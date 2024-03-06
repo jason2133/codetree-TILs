@@ -52,11 +52,41 @@ def eat_chobob(people_board, chobob_board_deque):
             if people_board[i][0][0] in chobob_board_deque[i]:
                 # print(chobob_board_deque[i])
                 # print(people_board[i][0][0], chobob_board_deque[i].count(people_board[i][0][0]))
-                people_board[i][0][1] -= chobob_board_deque[i].count(people_board[i][0][0])
-                chobob_board_deque[i].remove(people_board[i][0][0])
-                # print(chobob_board_deque[i])
-                if people_board[i][0][1] <= 0:
+                # chobob_board_deque[i].count(people_board[i][0][0]) > people_board[i][0][1]
+                # print('count comparison', people_board[i][0][1], chobob_board_deque[i].count(people_board[i][0][0]))
+
+                if people_board[i][0][1] > chobob_board_deque[i].count(people_board[i][0][0]):
+                    people_board[i][0][1] -= chobob_board_deque[i].count(people_board[i][0][0])
+                    for j in range(chobob_board_deque[i].count(people_board[i][0][0])):
+                        chobob_board_deque[i].remove(people_board[i][0][0])
+                    if people_board[i][0][1] <= 0:
+                        people_board[i].pop()
+                
+                elif people_board[i][0][1] < chobob_board_deque[i].count(people_board[i][0][0]):
+                    for j in range(people_board[i][0][1]):
+                        chobob_board_deque[i].remove(people_board[i][0][0])
+                    people_board[i][0][1] -= chobob_board_deque[i].count(people_board[i][0][0])
+                    if people_board[i][0][1] <= 0:
+                        people_board[i].pop()
+                
+                elif people_board[i][0][1] == chobob_board_deque[i].count(people_board[i][0][0]):
+                    # print(chobob_board_deque[i])
+                    # print(people_board[i])
+                    # print('-'*30)
+                    chobob_board_deque[i].remove(people_board[i][0][0])
                     people_board[i].pop()
+                    # print(chobob_board_deque[i])
+                    # print(people_board[i])
+                    # print('-'*30)
+                    # people_board[i][0][1] -= chobob_board_deque[i].count(people_board[i][0][0])
+                    # if people_board[i][0][1] <= 0:
+                    #     people_board[i].pop()
+
+                # people_board[i][0][1] -= chobob_board_deque[i].count(people_board[i][0][0])
+                # chobob_board_deque[i].remove(people_board[i][0][0])
+                # # print(chobob_board_deque[i])
+                # if people_board[i][0][1] <= 0:
+                #     people_board[i].pop()
     return people_board, chobob_board_deque
 
 # 명령 리스트 ㄱㄱ
