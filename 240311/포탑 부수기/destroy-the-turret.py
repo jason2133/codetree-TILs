@@ -125,13 +125,33 @@ for k in range(K):
 
     minimum_route_list = step_2_minimum_route(board, blue, red)
 
-    # 레이저 공격
-    for i in range(len(minimum_route_list)):
-        board[minimum_route_list[i][0]][minimum_route_list[i][1]] -= (board[blue[0]][blue[1]] // 2)
-        attack_each_turn_check[minimum_route_list[i][0]][minimum_route_list[i][1]] = True
+    if minimum_route_list != -1:
+        # 레이저 공격
+        for i in range(len(minimum_route_list)):
+            board[minimum_route_list[i][0]][minimum_route_list[i][1]] -= (board[blue[0]][blue[1]] // 2)
+            attack_each_turn_check[minimum_route_list[i][0]][minimum_route_list[i][1]] = True
 
-    board[red[0]][red[1]] -= board[blue[0]][blue[1]]
-    board, attack_each_turn_check = step_4_fix_potap(board, attack_each_turn_check)
+        board[red[0]][red[1]] -= board[blue[0]][blue[1]]
+        board, attack_each_turn_check = step_4_fix_potap(board, attack_each_turn_check)
+    else:
+        # 포탄 공격
+        dx_8 = [-1, -1, -1, 0, 0, 1, 1, 1]
+        dy_8 = [-1, 0, 1, -1, 1, -1, 0, 1]
+
+        for i in range(8):
+            nx = red[0] + dx_8[i]
+            ny = red[1] + dy_8[i]
+
+            if not (0 <= nx < N):
+                nx = nx % N
+            if not (0 <= ny < M):
+                ny = ny % M
+            
+            board[nx][ny] -= (board[blue[0]][blue[1]] // 2)
+            attack_each_turn_check[nx][ny] = True
+
+        board[red[0]][red[1]] -= (board[blue[0]][blue[1]] // 2)
+        board, attack_each_turn_check = step_4_fix_potap(board, attack_each_turn_check)
 
 answer = 0
 for i in board:
