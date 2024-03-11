@@ -104,8 +104,6 @@ def step_3_destroy_potap(board, attack_each_turn_check):
                 attack_each_turn_check[i][j] = True
     return board, attack_each_turn_check
 
-board, attack_each_turn_check = step_3_destroy_potap(board, attack_each_turn_check)
-
 # 4. 포탑 정비
 # 부서지지 않은 포탑 중 공격과 무관했던 포탑 -> 공격력이 1씩 올라감
 # 공격과 무관 : 공격자도 아니고, 공격에 피해를 입은 포탑도 아니라는 뜻임.
@@ -132,6 +130,8 @@ for k in range(K):
             attack_each_turn_check[minimum_route_list[i][0]][minimum_route_list[i][1]] = True
 
         board[red[0]][red[1]] -= board[blue[0]][blue[1]]
+
+        board, attack_each_turn_check = step_3_destroy_potap(board, attack_each_turn_check)
         board, attack_each_turn_check = step_4_fix_potap(board, attack_each_turn_check)
     else:
         # 포탄 공격
@@ -151,7 +151,12 @@ for k in range(K):
             attack_each_turn_check[nx][ny] = True
 
         board[red[0]][red[1]] -= (board[blue[0]][blue[1]] // 2)
+
+        board, attack_each_turn_check = step_3_destroy_potap(board, attack_each_turn_check)
         board, attack_each_turn_check = step_4_fix_potap(board, attack_each_turn_check)
+
+# for i in board:
+#     print(i)
 
 answer = 0
 for i in board:
