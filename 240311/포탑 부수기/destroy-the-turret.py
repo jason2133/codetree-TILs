@@ -85,6 +85,9 @@ def step_2_minimum_route(board, blue, red):
             nx = queue_x + dx[i]
             ny = queue_y + dy[i]
 
+            nx = nx % N
+            ny = ny % M
+
             if 0 <= nx < N and 0 <= ny < M:
                 if nx == red_x and ny == red_y:
                     return path[1:]
