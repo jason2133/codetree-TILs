@@ -1,168 +1,146 @@
-N, M, K = tuple(map(int, input().split()))
-
-board = []
-for i in range(N):
-    board.append(list(map(int, input().split())))
-
-attack_check = [[0 for i in range(M)] for j in range(N)]
-turn = 1
-
-attack_each_turn_check = [[False for i in range(M)] for j in range(N)]
-
-# 각 숫자는 공격력을 나타냄.
-# 공격력이 0이면 부서진 포탑
-
-# 하나의 턴 : 4가지 액션 순서대로 수행 -> K번 반복
-# 1. 공격자 선정
-# 2. 공격자의 공격
-# 2-1. 레이저 공격
-# 2-2. 포탄 공격
-# 3. 포탑 부서짐
-# 4. 포탑 정비
-
-# 1. 공격자 선정
-# 부서지지 않은 포탑 중 가장 약한 포탑 찾기 -> 공격자로 선정되기 때문
-# 1, 2, 3, 4 -> 이거 정렬 기준 잘 설정하기
-# 이 포탑에 대하여 N + M만큼 공격력 추가하기
-
-def step_1_select_attack(board, attack_check):
-    max_attack = 5001
-    attack_pos = []
-    for i in range(N):
-        for j in range(M):
-            if 1 <= board[i][j]:
-                if board[i][j] < max_attack:
-                    max_attack = board[i][j]
-                    attack_pos = []
-                    attack_pos.append([i, j])
-                elif board[i][j] == max_attack:
-                    attack_pos.append([i, j])
-    # 1순위) 가장 최근에 공격한 포탑              
-    # 2순위) 각 포탑 위치의 행과 열의 합이 가장 큰 포탑이 가장 약한 포탑
-    # 3순위) 각 포탑 위치의 열 값이 가장 큰 포탑
-    attack_pos = sorted(attack_pos, key=lambda x: (attack_check[x[0]][x[1]], -(x[0] + x[1]), x[1]))
-    board[attack_pos[0][0]][attack_pos[0][1]] += (N + M)
-    return board, attack_pos[0]
-
-# 2. 공격자의 공격
-# 자신을 제외한 가장 강한 포탑 찾기
-# 1, 2, 3, 4 -> 이거 정렬 기준 잘 설정하기
-def step_2_attack_to(board, turn, attack_check):
-    min_attack = 1
-    attack_pos = []
-    for i in range(N):
-        for j in range(M):
-            if 1 <= board[i][j]:
-                if min_attack < board[i][j]:
-                    min_attack = board[i][j]
-                    attack_pos = []
-                    attack_pos.append([i, j])
-                elif min_attack == board[i][j]:
-                    attack_pos.append([i, j])
-    # 1순위) 공격한지 가장 오래된 포탑이 가장 강한 포탑  
-    # 2순위) 각 포탑 위치의 행과 열의 합이 가장 작은 포탑
-    # 3순위) 각 포탑 위치의 열 값이 가장 작은 포탑
-    attack_pos = sorted(attack_pos, key=lambda x: (-attack_check[x[0]][x[1]], (x[0] + x[1]), x[1]))
-    attack_target = attack_pos[0]
-    attack_check[attack_pos[0][0]][attack_pos[0][1]] = turn
-    return attack_target
-
 from collections import deque
-def step_2_minimum_route(board, blue, red):
-    blue_x, blue_y = blue
-    red_x, red_y = red
 
-    visited = [(blue_x, blue_y)]
-    queue = deque([(blue_x, blue_y, [(blue_x, blue_y)])])
+def select_weakest(k):
+    temp = [[board[i][j][0], board[i][j][1], i+j, j, i] for i in range(N) for j in range(M) if board[i][j][0] != 0]
+    temp = sorted(temp, key=lambda x:(x[0],-x[1],-x[2],-x[3]))
+    board[temp[0][4]][temp[0][3]][0] += (N+M) # 핸디캡
+    board[temp[0][4]][temp[0][3]][1] = k # 턴수
+    return [temp[0][4], temp[0][3]] # 행, 열
 
-    dx = [0, 1, 0, -1]
-    dy = [1, 0, -1, 0]
+def select_strongest(start):
+    temp = [[board[i][j][0], board[i][j][1], i + j, j, i] for i in range(N) for j in range(M) if board[i][j][0] != 0 and [i,j]!=start]
+    temp = sorted(temp, key=lambda x: (-x[0], x[1], x[2], x[3]))
+    return [temp[0][4], temp[0][3]] # 행, 열
 
+def attack(start, end):
+    dr = [0, 1, 0, -1]  # 우 하 좌 상
+    dc = [1, 0, -1, 0]
+
+    queue = deque()
+    queue.append(start)
+    visited = [[False for _ in range(M)] for _ in range(N)]
+    visited[start[0]][start[1]] = True
+    flag = False
+    path = [[[0,0] for _ in range(M)] for _ in range(N)] # 최단경로
+    path[start[0]][start[1]] = start
+
+    # 최단경로 찾기
     while queue:
-        queue_x, queue_y, path = queue.popleft()
-
+        nr, nc = queue.popleft()
+        if nr == end[0] and nc == end[1]:
+            flag = True
+            break
         for i in range(4):
-            nx = queue_x + dx[i]
-            ny = queue_y + dy[i]
+            nextr = nr + dr[i]
+            nextc = nc + dc[i]
+            # 범위 조정
+            if nextr < 0: # 위로 벗어남
+                nextr = N-1
+            if nextr >= N: # 아래로 벗어남
+                nextr = 0
+            if nextc < 0: # 왼쪽으로 벗어남
+                nextc = M-1
+            if nextc >= M: # 오른쪽으로 벗어남
+                nextc = 0
+            # 부서진 포탑은 지날 수 없음
+            if board[nextr][nextc][0] == 0:
+                continue
+            if visited[nextr][nextc] == False: # 아직 방문 X
+                queue.append([nextr, nextc])
+                visited[nextr][nextc] = True
+                path[nextr][nextc] = [nr, nc]
 
-            nx = nx % N
-            ny = ny % M
-
-            if 0 <= nx < N and 0 <= ny < M:
-                if nx == red_x and ny == red_y:
-                    return path[1:]
-                if (nx, ny) not in visited:
-                    visited.append((nx, ny))
-                    queue.append((nx, ny, path + [(nx, ny)]))
-    return -1
-    
-# 3. 포탑 부서짐
-# 공격력 0 이하가 된 포탑은 부서짐
-
-def step_3_destroy_potap(board, attack_each_turn_check):
-    for i in range(N):
-        for j in range(M):
-            if board[i][j] <= 0:
-                board[i][j] = 0
-                attack_each_turn_check[i][j] = True
-    return board, attack_each_turn_check
-
-# 4. 포탑 정비
-# 부서지지 않은 포탑 중 공격과 무관했던 포탑 -> 공격력이 1씩 올라감
-# 공격과 무관 : 공격자도 아니고, 공격에 피해를 입은 포탑도 아니라는 뜻임.
-def step_4_fix_potap(board, attack_each_turn_check):
-    for i in range(N):
-        for j in range(M):
-            if attack_each_turn_check[i][j] == False:
-                board[i][j] += 1
-    return board, attack_each_turn_check
-
-for k in range(K):
-    board, blue = step_1_select_attack(board, attack_check)
-    attack_each_turn_check[blue[0]][blue[1]] = True
-
-    red = step_2_attack_to(board, turn, attack_check)
-    attack_each_turn_check[red[0]][red[1]] = True
-
-    minimum_route_list = step_2_minimum_route(board, blue, red)
-
-    if minimum_route_list != -1:
+    damage = board[start[0]][start[1]][0]
+    attacked = [start, end]
+    board[end[0]][end[1]][0] -= damage  # 공격
+    if board[end[0]][end[1]][0] < 0:
+        board[end[0]][end[1]][0] = 0
+    if flag:
         # 레이저 공격
-        for i in range(len(minimum_route_list)):
-            board[minimum_route_list[i][0]][minimum_route_list[i][1]] -= (board[blue[0]][blue[1]] // 2)
-            attack_each_turn_check[minimum_route_list[i][0]][minimum_route_list[i][1]] = True
-
-        board[red[0]][red[1]] -= board[blue[0]][blue[1]]
-
-        board, attack_each_turn_check = step_3_destroy_potap(board, attack_each_turn_check)
-        board, attack_each_turn_check = step_4_fix_potap(board, attack_each_turn_check)
+        tempr, tempc = path[end[0]][end[1]]
+        while (tempr, tempc) != (start[0], start[1]):
+            # print(tempr, tempc)
+            board[tempr][tempc][0] -= damage//2 # 절반 피해
+            if board[tempr][tempc][0] < 0:
+                board[tempr][tempc][0] = 0
+            attacked.append([tempr,tempc])
+            tempr, tempc = path[tempr][tempc]
     else:
         # 포탄 공격
-        dx_8 = [-1, -1, -1, 0, 0, 1, 1, 1]
-        dy_8 = [-1, 0, 1, -1, 1, -1, 0, 1]
+        dr = [-1,0,1]
+        dc = [-1,0,1]
+        for i in range(3):
+            for j in range(3):
+                nextr, nextc = end[0]+dr[i], end[1]+dc[j]
+                if nextr < 0:  # 위로 벗어남
+                    nextr = N - 1
+                if nextr >= N:  # 아래로 벗어남
+                    nextr = 0
+                if nextc < 0:  # 왼쪽으로 벗어남
+                    nextc = M - 1
+                if nextc >= M:  # 오른쪽으로 벗어남
+                    nextc = 0
+                if board[nextr][nextc][0] == 0 or [dr[i],dc[j]] == [0,0] or [nextr,nextc]==start: # 부서진 포탄은 X
+                    continue
+                board[nextr][nextc][0] -= damage // 2  # 절반 피해
+                if board[nextr][nextc][0] < 0:
+                    board[nextr][nextc][0] = 0
+                attacked.append([nextr,nextc])
 
-        for i in range(8):
-            nx = red[0] + dx_8[i]
-            ny = red[1] + dy_8[i]
+    return attacked
 
-            if not (0 <= nx < N):
-                nx = nx % N
-            if not (0 <= ny < M):
-                ny = ny % M
-            
-            board[nx][ny] -= (board[blue[0]][blue[1]] // 2)
-            attack_each_turn_check[nx][ny] = True
+def maintain(attacked):
+    for i in range(N):
+        for j in range(M):
+            if board[i][j][0] > 0 and [i,j] not in attacked:
+                board[i][j][0] += 1
+    return
 
-        board[red[0]][red[1]] -= (board[blue[0]][blue[1]] // 2)
+def check():
+    count = 0
+    for i in range(N):
+        for j in range(M):
+            if board[i][j][0] > 0:
+                count += 1
+    if count == 1:
+        return True
+    return False
 
-        board, attack_each_turn_check = step_3_destroy_potap(board, attack_each_turn_check)
-        board, attack_each_turn_check = step_4_fix_potap(board, attack_each_turn_check)
+N, M, K = map(int, input().split())
+board = []
+INF = 1e8
+for _ in range(N):
+    row = list(map(int, input().split()))
+    b = []
+    for r in row:
+        b.append([r,0])
+    board.append(b)
 
-# for i in board:
-#     print(i)
+for k in range(K):
+    # 1. 가장 약한 포탑 고르기
+    s = select_weakest(k+1) # k턴, 시작점 좌표 반환
 
-answer = 0
-for i in board:
-    if answer < max(i):
-        answer = max(i)
+    # 2. 가장 강한 포탑 고르기
+    e = select_strongest(s) # 시작점 제외, 끝점 좌표 반환
+
+    # 3. 공격하기
+    attacked = attack(s,e) # 공격과 상관있는 포탑 반환
+
+    # 4. 정비하기
+    maintain(attacked) # 공격과 상관없는 포탑 공격력 + 1
+
+    # for b in board:
+    #     print(b)
+
+    # 5. 종료여부 확인하기 (부서지지 않은 포탑 개수=1)
+    if check():
+        break
+
+# 가장 강한 포탑 찾기
+answer = -1
+for i in range(N):
+    for j in range(M):
+        if board[i][j][0] > answer:
+            answer = board[i][j][0]
+
 print(answer)
