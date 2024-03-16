@@ -80,73 +80,90 @@ def num_200(K, S, rabbit_info):
             # 상
             if j == 0:
                 distance_num = distance
-                nx = select_rabbit[2]
+                # nx = select_rabbit[2]
+                # ny = select_rabbit[3]
+                # k = 1
+                # while distance_num != 0:
+                #     # if nx + dx[j] >= 0:
+                #     if nx + (dx[j] * k) >= 0 and nx + (dx[j] * k) <= (N-1):
+                #         nx += (dx[j] * k)
+                #         ny += (dy[j] * k)
+                #     else:
+                #         k = k * (-1)
+                #         nx += (dx[j] * k)
+                #         ny += (dy[j] * k)
+                #     distance_num -= 1
+                nx = (select_rabbit[2] + distance_num) % (2 * (N-1))
                 ny = select_rabbit[3]
-                k = 1
-                while distance_num != 0:
-                    # if nx + dx[j] >= 0:
-                    if nx + (dx[j] * k) >= 0 and nx + (dx[j] * k) <= (N-1):
-                        nx += (dx[j] * k)
-                        ny += (dy[j] * k)
-                    else:
-                        k = k * (-1)
-                        nx += (dx[j] * k)
-                        ny += (dy[j] * k)
-                    distance_num -= 1
+                if nx >= N:
+                    nx = 2 * (N - 1) - nx
                 select_rabbit_position.append([nx, ny])
             
             # 하
             if j == 1:
                 distance_num = distance
-                nx = select_rabbit[2]
+                # nx = select_rabbit[2]
+                # ny = select_rabbit[3]
+                # k = 1
+                # while distance_num != 0:
+                #     # if nx + dx[j] <= (N - 1):
+                #     if nx + (dx[j] * k) >= 0 and nx + (dx[j] * k) <= (N-1):    
+                #         nx += (dx[j] * k)
+                #         ny += (dy[j] * k)
+                #     else:
+                #         k = k * (-1)
+                #         nx += (dx[j] * k)
+                #         ny += (dy[j] * k)
+                #     distance_num -= 1
+                nx = (select_rabbit[2] - distance_num) % (2 * (N-1))
                 ny = select_rabbit[3]
-                k = 1
-                while distance_num != 0:
-                    # if nx + dx[j] <= (N - 1):
-                    if nx + (dx[j] * k) >= 0 and nx + (dx[j] * k) <= (N-1):    
-                        nx += (dx[j] * k)
-                        ny += (dy[j] * k)
-                    else:
-                        k = k * (-1)
-                        nx += (dx[j] * k)
-                        ny += (dy[j] * k)
-                    distance_num -= 1
+                if nx >= N:
+                    nx = 2 * (N - 1) - nx
+
                 select_rabbit_position.append([nx, ny])
         
             # 좌
             if j == 2:
                 distance_num = distance
+                # nx = select_rabbit[2]
+                # ny = select_rabbit[3]
+                # k = 1
+                # while distance_num != 0:
+                #     # if ny + dy[j] >= 0:
+                #     if ny + (dy[j] * k) >= 0 and ny + (dy[j] * k) <= (M-1):
+                #         nx += (dx[j] * k)
+                #         ny += (dy[j] * k)
+                #     else:
+                #         k = k * (-1)
+                #         nx += (dx[j] * k)
+                #         ny += (dy[j] * k)
+                #     distance_num -= 1
                 nx = select_rabbit[2]
-                ny = select_rabbit[3]
-                k = 1
-                while distance_num != 0:
-                    # if ny + dy[j] >= 0:
-                    if ny + (dy[j] * k) >= 0 and ny + (dy[j] * k) <= (M-1):
-                        nx += (dx[j] * k)
-                        ny += (dy[j] * k)
-                    else:
-                        k = k * (-1)
-                        nx += (dx[j] * k)
-                        ny += (dy[j] * k)
-                    distance_num -= 1
+                ny = (select_rabbit[3] + distance_num) % (2 * (M - 1))
+                if ny >= M:
+                    ny = 2 * (M - 1) - ny
                 select_rabbit_position.append([nx, ny])
             
             # 우
             if j == 3:
                 distance_num = distance
+                # nx = select_rabbit[2]
+                # ny = select_rabbit[3]
+                # k = 1
+                # while distance_num != 0:
+                #     # if nx + dx[j] <= (M - 1):
+                #     if ny + (dy[j] * k) >= 0 and ny + (dy[j] * k) <= (M-1):
+                #         nx += (dx[j] * k)
+                #         ny += (dy[j] * k)
+                #     else:
+                #         k = k * (-1)
+                #         nx += (dx[j] * k)
+                #         ny += (dy[j] * k)
+                #     distance_num -= 1
                 nx = select_rabbit[2]
-                ny = select_rabbit[3]
-                k = 1
-                while distance_num != 0:
-                    # if nx + dx[j] <= (M - 1):
-                    if ny + (dy[j] * k) >= 0 and ny + (dy[j] * k) <= (M-1):
-                        nx += (dx[j] * k)
-                        ny += (dy[j] * k)
-                    else:
-                        k = k * (-1)
-                        nx += (dx[j] * k)
-                        ny += (dy[j] * k)
-                    distance_num -= 1
+                ny = (select_rabbit[3] - distance_num) % (2 * (M - 1))
+                if ny >= M:
+                    ny = 2 * (M - 1) - ny 
                 select_rabbit_position.append([nx, ny])
 
         select_rabbit_position = sorted(select_rabbit_position, key=lambda x: (-(x[0] + x[1]), -x[0], -x[1]))
@@ -201,15 +218,3 @@ for i in range(Q-1):
     elif input_data[0] == 400:
         answer = num_400(rabbit_info)
 print(answer)
-
-# rabbit_info = num_200(6, 100, rabbit_info)
-# rabbit_info = num_300(10, 2, rabbit_info)
-# rabbit_info = num_200(3, 20, rabbit_info)
-# answer = num_400(rabbit_info)
-# print(answer)
-
-# 300 이동거리 변경
-# 300 pid_t L
-    
-# 400 최고의 토끼 선정
-# 정확히 마지막 명령으로 주어지며, 항상 주어짐.
