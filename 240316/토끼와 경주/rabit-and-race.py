@@ -1,220 +1,112 @@
-# 1. 경주 시작 준비
-# 2. 경주 진행
-# 3. 이동거리 변경
-# 4. 최고의 토끼 선정
+# 힙을 이용해서 계산 복잡도 줄이기
+import heapq
+import sys
+def input():
+    return sys.stdin.readline().rstrip()
 
-# 명령의 수
+dx = [0, -1, 0, 1]
+dy = [-1, 0, 1, 0]
+
 Q = int(input())
+N, M = -1, -1
 
-# 100 경주 시작 준비
-num_100 = tuple(map(int, input().split()))
+# pid : [d, score]
+rabbit = dict()
 
-# num_100 = [100, 3, 5, 2, 10, 2, 20, 5]
+#움직이는 토끼 선택용 [[총 점프 횟수, 행번호+열번호, 행번호, 열번호, pid] ... ]
+prior_global = []
 
-N, M = num_100[1], num_100[2]
-P = num_100[3]
+def start_200(K, S):
+    # 마지막 점수 주는 토끼 선택용
+    prior_local = []
 
-board = [[[] for i in range(M)] for j in range(N)]
-# for i in board:
-#     print(i)
+    for k in range(K):
+        tjcnt, _, x, y, pid = heapq.heappop(prior_global)
+        d = rabbit[pid][0]
+        tmp = []
 
-# 처음 토끼들은 전부 (1행, 1열)에 있음.
+        # d가 1,000,000,000인거 고려하기
+        nx, ny = x, y
 
-rabbit_info = []
-for i in range(P):
-    # 토끼의 고유번호 pid_i, 이동해야 하는 거리 d_i
-    # 토끼의 고유번호 pid_i, 이동해야 하는 거리 d_i, 행 위치, 열 위치, 총 점프 횟수, 토끼의 점수, 이번 턴에 뽑혔나요?
-    rabbit_info.append([num_100[4 + 2 * i], num_100[4 + 1 + 2 * i], 0, 0, 0, 0, 100])
-
-# for i in rabbit_info:
-#     print(i)
-
-# 200 경주 진행
-# 200 K S
-# K번의 턴 진행, 우선순위가 가장 높은 토끼에 대하여 점수 S점을 더해줌.
-# 우선순위는 순서대로 (현재까지의 총 점프 횟수가 적은 토끼, 현재 서있는 행 번호 + 열 번호가 작은 토끼, 행 번호가 작은 토끼, 열 번호가 작은 토끼, 고유번호가 작은 토끼) 순
-
-# K번의 턴이 모두 진행된 직후에는
-# (현재 서있는 행 번호 + 열 번호가 큰 토끼, 행 번호가 큰 토끼, 열 번호가 큰 토끼, 고유번호가 큰 토끼) 순으로 우선순위를 두었을 때 가장 우선순위가 높은 토끼를 골라 점수 S를 더해주게 됨.
-# 단, 이 경우에는 K번의 턴 동안 한번이라도 뽑혔던 적이 있던 토끼 중 가장 우선순위가 높은 토끼를 골라야만 함에 꼭 유의
-def num_200(K, S, rabbit_info):
-    # 상 하 좌 우
-    dx = [-1, 1, 0, 0]
-    dy = [0, 0, -1, 1]
-
-    # 이번 턴에 뽑혔는지, 이거 초기화
-    for j in range(len(rabbit_info)):
-        rabbit_info[j][-1] = 100
-
-    # K번의 턴 진행
-    for i in range(K):
-        # 우선순위 정렬
-        # 토끼의 고유번호 pid_i, 이동해야 하는 거리 d_i, 행 위치, 열 위치, 총 점프 횟수, 토끼의 점수, 이번 턴에 뽑혔나요?
-        rabbit_info = sorted(rabbit_info, key=lambda x: (x[4], (x[2] + x[3]), x[2], x[3], x[0]))
-        select_rabbit = rabbit_info[0]
-        # print(f'select_rabbit', select_rabbit)
-        # print(f'nx {select_rabbit[2]}, ny {select_rabbit[3]}, distance {select_rabbit[1]}')
-        select_rabbit_position = []
-
-        # 이동거리
-        distance = select_rabbit[1]
-
-        # 이때 이동하는 도중 그 다음 칸이 격자를 벗어나게 된다면 방향을 반대로 바꿔 한 칸 이동
-        for j in range(4):
-
-            # # 상
-            # if j == 0:
-            #     distance_num = distance
-            #     nx = select_rabbit[2]
-            #     ny = select_rabbit[3]
-            #     while distance_num != 0:
-            #         if nx + dx[j] >= 0:
-            #             nx += dx[j]
-            #             ny += dy[j]
-            #         else:
-            #             nx -= dx[j]
-            #             ny -= dy[j]
-            #         distance_num -= 1
-            #     select_rabbit_position.append([nx, ny])
-
-            # 상
-            if j == 0:
-                distance_num = distance
-                # nx = select_rabbit[2]
-                # ny = select_rabbit[3]
-                # k = 1
-                # while distance_num != 0:
-                #     # if nx + dx[j] >= 0:
-                #     if nx + (dx[j] * k) >= 0 and nx + (dx[j] * k) <= (N-1):
-                #         nx += (dx[j] * k)
-                #         ny += (dy[j] * k)
-                #     else:
-                #         k = k * (-1)
-                #         nx += (dx[j] * k)
-                #         ny += (dy[j] * k)
-                #     distance_num -= 1
-                nx = (select_rabbit[2] + distance_num) % (2 * (N-1))
-                ny = select_rabbit[3]
-                if nx >= N:
-                    nx = 2 * (N - 1) - nx
-                select_rabbit_position.append([nx, ny])
-            
-            # 하
-            if j == 1:
-                distance_num = distance
-                # nx = select_rabbit[2]
-                # ny = select_rabbit[3]
-                # k = 1
-                # while distance_num != 0:
-                #     # if nx + dx[j] <= (N - 1):
-                #     if nx + (dx[j] * k) >= 0 and nx + (dx[j] * k) <= (N-1):    
-                #         nx += (dx[j] * k)
-                #         ny += (dy[j] * k)
-                #     else:
-                #         k = k * (-1)
-                #         nx += (dx[j] * k)
-                #         ny += (dy[j] * k)
-                #     distance_num -= 1
-                nx = (select_rabbit[2] - distance_num) % (2 * (N-1))
-                ny = select_rabbit[3]
-                if nx >= N:
-                    nx = 2 * (N - 1) - nx
-
-                select_rabbit_position.append([nx, ny])
+        # 상
+        nx = (x + d) % (2 * (N - 1))
+        if nx >= N:
+            nx = 2 * (N - 1) - nx
+        # 최대 힙
+        heapq.heappush(tmp, [-(nx + y), -nx, -y])
         
-            # 좌
-            if j == 2:
-                distance_num = distance
-                # nx = select_rabbit[2]
-                # ny = select_rabbit[3]
-                # k = 1
-                # while distance_num != 0:
-                #     # if ny + dy[j] >= 0:
-                #     if ny + (dy[j] * k) >= 0 and ny + (dy[j] * k) <= (M-1):
-                #         nx += (dx[j] * k)
-                #         ny += (dy[j] * k)
-                #     else:
-                #         k = k * (-1)
-                #         nx += (dx[j] * k)
-                #         ny += (dy[j] * k)
-                #     distance_num -= 1
-                nx = select_rabbit[2]
-                ny = (select_rabbit[3] + distance_num) % (2 * (M - 1))
-                if ny >= M:
-                    ny = 2 * (M - 1) - ny
-                select_rabbit_position.append([nx, ny])
-            
-            # 우
-            if j == 3:
-                distance_num = distance
-                # nx = select_rabbit[2]
-                # ny = select_rabbit[3]
-                # k = 1
-                # while distance_num != 0:
-                #     # if nx + dx[j] <= (M - 1):
-                #     if ny + (dy[j] * k) >= 0 and ny + (dy[j] * k) <= (M-1):
-                #         nx += (dx[j] * k)
-                #         ny += (dy[j] * k)
-                #     else:
-                #         k = k * (-1)
-                #         nx += (dx[j] * k)
-                #         ny += (dy[j] * k)
-                #     distance_num -= 1
-                nx = select_rabbit[2]
-                ny = (select_rabbit[3] - distance_num) % (2 * (M - 1))
-                if ny >= M:
-                    ny = 2 * (M - 1) - ny 
-                select_rabbit_position.append([nx, ny])
+        # 하
+        nx = (x - d) % (2 * (N - 1))
+        if nx >= N:
+            nx = 2 * (N - 1) - nx
+        # 최대 힙
+        heapq.heappush(tmp, [-(nx + y), -nx, -y])
 
-        select_rabbit_position = sorted(select_rabbit_position, key=lambda x: (-(x[0] + x[1]), -x[0], -x[1]))
-        # print(f'Turn {i + 1} select_rabbit_position', select_rabbit_position)
-        select_rabbit_position_confirm = select_rabbit_position[0]
-        rabbit_info[0][2] = select_rabbit_position_confirm[0]
-        rabbit_info[0][3] = select_rabbit_position_confirm[1]
-        rabbit_info[0][4] += 1
-        rabbit_info[0][-1] = 1
+        # 좌
+        ny = (y + d) % (2 * (M - 1))
+        if ny >= M:
+            ny = 2 * (M - 1) - ny
+        # 최대 힙
+        heapq.heappush(tmp, [-(x + ny), -x, -ny])
 
-        for k in range(1, len(rabbit_info)):
-            rabbit_info[k][-2] += (select_rabbit_position_confirm[0] + 1 + select_rabbit_position_confirm[1] + 1)
-        # print(f'Turn {i + 1} rabbit info', rabbit_info)
-    # K번의 턴이 모두 진행된 직후에는 
-    # (현재 서있는 행 번호 + 열 번호가 큰 토끼, 행 번호가 큰 토끼, 열 번호가 큰 토끼, 고유번호가 큰 토끼) 순으로 우선순위를 두었을 때 
-    # 가장 우선순위가 높은 토끼를 골라 점수 S를 더해주게 됩니다.
-    # 단, 이 경우에는 K번의 턴 동안 한번이라도 뽑혔던 적이 있던 토끼 중 가장 우선순위가 높은 토끼를 골라야만 함에 꼭 유의
+        # 우
+        ny = (y - d) % (2 * (M - 1))
+        if ny >= M:
+            ny = 2 * (M - 1) - ny
+        # 최대 힙
+        heapq.heappush(tmp, [-(x + ny), -x, -ny])
+
+        _, nx, ny = tmp[0]
+        nx, ny = -nx, -ny
+
+        for key, value in rabbit.items():
+            if key != pid:
+                rabbit[key][1] += (nx + ny + 2)
+        
+        heapq.heappush(prior_global, [tjcnt + 1, nx + ny, nx, ny, pid])
+        
+        # 최대 힙
+        heapq.heappush(prior_local, [-(nx + ny), -nx, -ny, -pid])
+
+    _, x, y, pid = heapq.heappop(prior_local)
+    x, y, pid = -x, -y, -pid
+    rabbit[pid][1] += S
+
+def changeDist_300(pid, L):
+    rabbit[pid][0] *= L
+
+def best_400():
+    max_s = -1
+    for key, value in rabbit.items():
+        s = value[1]
+        max_s = max(max_s, s)
+    print(max_s)
+
+for q in range(Q):
+    cmd = list(map(int, input().split()))
     
-    # 토끼의 고유번호 pid_i, 이동해야 하는 거리 d_i, 행 위치, 열 위치, 총 점프 횟수, 토끼의 점수, 이번 턴에 뽑혔나요?
-    rabbit_info = sorted(rabbit_info, key=lambda x: (x[-1], -(x[2] + x[3]), -x[2], -x[3], -x[0]))
-    if rabbit_info[0][-1] == 1:
-        rabbit_info[0][-2] += S
-    return rabbit_info
+    # 경주 시작 준비
+    if cmd [0] == 100:
+        N = cmd[1]
+        M = cmd[2]
+        P = cmd[3]
+        cmd = cmd[4:]
 
-# 300 pid_t L
-def num_300(pid_t, L, rabbit_info):
-    for i in range(len(rabbit_info)):
-        if rabbit_info[i][0] == pid_t:
-            rabbit_info[i][1] = rabbit_info[i][1] * L
-            break
-    return rabbit_info
-
-# 400
-def num_400(rabbit_info):
-    answer = 0
-    for i in range(len(rabbit_info)):
-        if rabbit_info[i][-2] >= answer:
-            answer = rabbit_info[i][-2]
-    return answer
-
-# num_200(K, S, rabbit_info, board)
-# 토끼의 고유번호 pid_i, 이동해야 하는 거리 d_i, 행 위치, 열 위치, 총 점프 횟수, 토끼의 점수, 이번 턴에 뽑혔나요?
-# print(num_200(6, 100, rabbit_info))
-
-for i in range(Q-1):
-    input_data = tuple(map(int, input().split()))
-
-    if input_data[0] == 200:
-        rabbit_info = num_200(input_data[1], input_data[2], rabbit_info)
-    elif input_data[0] == 300:
-        rabbit_info = num_300(input_data[1], input_data[2], rabbit_info)
-    elif input_data[0] == 400:
-        answer = num_400(rabbit_info)
-print(answer)
+        for i in range(0, len(cmd), 2):
+            pid, d = int(cmd[i]), int(cmd[i+1])
+            rabbit[pid] = [d, 0]
+            heapq.heappush(prior_global, [0, 0, 0, 0, pid])
+    
+    # 경주 진행
+    elif cmd[0] == 200:
+        K, S = cmd[1], cmd[2]
+        start_200(K, S)
+    
+    # 이동거리 변경
+    elif cmd[0] == 300:
+        pid, L = cmd[1], cmd[2]
+        changeDist_300(pid, L)
+    
+    # 최고의 토끼 선정
+    elif cmd[0] == 400:
+        best_400()
