@@ -7,7 +7,7 @@
 Q = int(input())
 
 # 100 경주 시작 준비
-num_100 = list(map(int, input().split()))
+num_100 = tuple(map(int, input().split()))
 
 # num_100 = [100, 3, 5, 2, 10, 2, 20, 5]
 
@@ -192,7 +192,7 @@ def num_400(rabbit_info):
 # print(num_200(6, 100, rabbit_info))
 
 for i in range(Q-1):
-    input_data = list(map(int, input().split()))
+    input_data = tuple(map(int, input().split()))
 
     if input_data[0] == 200:
         rabbit_info = num_200(input_data[1], input_data[2], rabbit_info)
