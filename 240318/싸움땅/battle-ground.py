@@ -155,8 +155,9 @@ def step_2_player_fight(nx, ny, move_player, gun_info, player_board, player_info
     
     get_point = 0
     for i in range(len(player_info)):
-        if player_info[i] != winner:
-            get_point += abs(player_info[i][4] - sum(player_info[i][5]))
+        # if player_info[i] != winner:
+        #     get_point += abs(player_info[i][4] - sum(player_info[i][5]))
+        get_point += abs(player_info[i][4] - sum(player_info[i][5]))
     player_point[player_num] += get_point
 
     # 2-2-2. 진 플레이어는 본인이 가지고 있는 총을 해당 격자에 내려놓고, 해당 플레이어가 원래 가지고 있던 방향대로 한 칸 이동
