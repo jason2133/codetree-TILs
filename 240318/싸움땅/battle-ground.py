@@ -120,7 +120,7 @@ def step_2_1_player(nx, ny, move_player, gun_info, player_board, player_info):
 # 2-2-1. 만약 이동한 방향에 플레이어가 있는 경우에는 두 플레이어가 싸우게 됨.
 # 번호 / (x, y)는 플레이어의 위치, d는 방향, s는 플레이어의 초기 능력치 / 플레이어가 들고 있는 총
 def step_2_player_fight(nx, ny, move_player, gun_info, player_board, player_info, player_point, player_num):
-    global winner, loser
+    global winner, loser, get_point
 
     player_1 = move_player
     player_2 = player_board[nx][ny][0]
@@ -142,23 +142,28 @@ def step_2_player_fight(nx, ny, move_player, gun_info, player_board, player_info
     if player_1_ability > player_2_ability:
         winner = player_1
         loser = player_2
+        get_point = (player_1[4] + sum(player_1[5])) - (player_2[4] + sum(player_2[5]))
+
     elif player_1_ability < player_2_ability:
         winner = player_2
         loser = player_1
+        get_point = (player_2[4] + sum(player_2[5])) - (player_1[4] + sum(player_1[5]))
     else:
         if player_1[4] > player_2[4]:
             winner = player_1
             loser = player_2
+            get_point = (player_1[4] + sum(player_1[5])) - (player_2[4] + sum(player_2[5]))
         elif player_1[4] < player_2[4]:
             winner = player_2
             loser = player_1
+            get_point = (player_2[4] + sum(player_2[5])) - (player_1[4] + sum(player_1[5]))
     
-    get_point = 0
-    for i in range(len(player_info)):
-        # if player_info[i] != winner:
-        #     get_point += abs(player_info[i][4] - sum(player_info[i][5]))
-        get_point += abs(player_info[i][4] - sum(player_info[i][5]))
-    # print('player_num', player_num, 'get_point', get_point)
+    # get_point = 0
+    # for i in range(len(player_info)):
+    #     # if player_info[i] != winner:
+    #     #     get_point += abs(player_info[i][4] - sum(player_info[i][5]))
+    #     get_point += abs(player_info[i][4] - sum(player_info[i][5]))
+    # # print('player_num', player_num, 'get_point', get_point)
     player_point[player_num] += get_point
 
     # 2-2-2. 진 플레이어는 본인이 가지고 있는 총을 해당 격자에 내려놓고, 해당 플레이어가 원래 가지고 있던 방향대로 한 칸 이동
@@ -232,4 +237,4 @@ for i in range(k):
             player_num = j
             nx, ny, move_player, gun_info, player_board, player_info, player_point, player_num = step_2_player_fight(nx, ny, move_player, gun_info, player_board, player_info, player_point, player_num)
 
-print(' '.join(map(str, player_point)))
+print(player_point)
