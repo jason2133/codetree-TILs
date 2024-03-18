@@ -69,28 +69,28 @@ def step_1_1_player_move(move_player, player_board):
 
     if n <= nx:
         nx = (n-1)
-        if move_player[3] == 0 or move_player[3] == 3:
+        if move_player[3] == 0 or move_player[3] == 2:
             move_player[3] += 1
         else:
             move_player[3] -= 1
     
     if nx < 0:
         nx = 0
-        if move_player[3] == 0 or move_player[3] == 3:
+        if move_player[3] == 0 or move_player[3] == 2:
             move_player[3] += 1
         else:
             move_player[3] -= 1
     
     if n <= ny:
         ny = (n-1)
-        if move_player[3] == 0 or move_player[3] == 3:
+        if move_player[3] == 0 or move_player[3] == 2:
             move_player[3] += 1
         else:
             move_player[3] -= 1
     
     if ny < 0:
         ny = 0
-        if move_player[3] == 0 or move_player[3] == 3:
+        if move_player[3] == 0 or move_player[3] == 2:
             move_player[3] += 1
         else:
             move_player[3] -= 1
