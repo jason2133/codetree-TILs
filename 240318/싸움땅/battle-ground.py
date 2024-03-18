@@ -200,8 +200,8 @@ def step_2_player_fight(nx, ny, move_player, gun_info, player_board, player_info
     #     gun_info[nx][ny].remove(k)
 
     if winner[-1] != [] and gun_info[nx][ny] != []:
-        print('winner[-1]', winner[-1])
-        print('gun_info[nx][ny]', gun_info[nx][ny])
+        # print('winner[-1]', winner[-1])
+        # print('gun_info[nx][ny]', gun_info[nx][ny])
         if max(winner[-1]) > max(gun_info[nx][ny]):
             k = max(winner[-1])
             for i in range(len(winner[-1])):
