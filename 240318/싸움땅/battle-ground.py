@@ -69,31 +69,31 @@ def step_1_1_player_move(move_player, player_board):
 
     if n <= nx:
         nx = (n-1)
-        if move_player[3] == 0 or move_player[3] == 2:
-            move_player[3] += 1
+        if move_player[3] == 0 or move_player[3] == 1:
+            move_player[3] += 2
         else:
-            move_player[3] -= 1
+            move_player[3] -= 2
     
     if nx < 0:
         nx = 0
-        if move_player[3] == 0 or move_player[3] == 2:
-            move_player[3] += 1
+        if move_player[3] == 0 or move_player[3] == 1:
+            move_player[3] += 2
         else:
-            move_player[3] -= 1
+            move_player[3] -= 2
     
     if n <= ny:
         ny = (n-1)
-        if move_player[3] == 0 or move_player[3] == 2:
-            move_player[3] += 1
+        if move_player[3] == 0 or move_player[3] == 1:
+            move_player[3] += 2
         else:
-            move_player[3] -= 1
+            move_player[3] -= 2
     
     if ny < 0:
         ny = 0
-        if move_player[3] == 0 or move_player[3] == 2:
-            move_player[3] += 1
+        if move_player[3] == 0 or move_player[3] == 1:
+            move_player[3] += 2
         else:
-            move_player[3] -= 1
+            move_player[3] -= 2
     return nx, ny, move_player, player_board
 
 # 번호 / (x, y)는 플레이어의 위치, d는 방향, s는 플레이어의 초기 능력치 / 플레이어가 들고 있는 총
@@ -232,5 +232,4 @@ for i in range(k):
             player_num = j
             nx, ny, move_player, gun_info, player_board, player_info, player_point, player_num = step_2_player_fight(nx, ny, move_player, gun_info, player_board, player_info, player_point, player_num)
 
-# print(player_point, sep=' ')
 print(' '.join(map(str, player_point)))
