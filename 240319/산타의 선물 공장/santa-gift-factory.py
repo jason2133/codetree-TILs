@@ -91,11 +91,14 @@ def num_400(belt_info, f_id, belt_correct_check):
                     # 단, 상자가 있는 경우, 해당 상자 위에 있는 모든 상자를 전부 앞으로 가져옴.
                     # 가져올 시 순서는 그대로 유지가 되어야 함에 유의
                     added_info = []
-                    for k in range(len(belt_info[i]), j-1, -1):
-                        added_info.append(belt_info[i][-1])
-                        belt_info[i].pop()
-                    belt_info[i] = added_info + belt_info[i]
-                    return i + 1, belt_info, belt_correct_check
+                    if belt_info[i] == []:
+                        pass
+                    else:
+                        for k in range(len(belt_info[i]), j-1, -1):
+                            added_info.append(belt_info[i][-1])
+                            belt_info[i].pop()
+                        belt_info[i] = added_info + belt_info[i]
+                        return i + 1, belt_info, belt_correct_check
     return -1, belt_info, belt_correct_check
 
 # 5. 벨트 고장
