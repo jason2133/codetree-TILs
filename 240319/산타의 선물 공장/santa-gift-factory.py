@@ -9,7 +9,6 @@ q = int(input())
 # m개의 벨트, n개의 선물 -> 공장
 # 선물을 주어진 순서대로 n/m개씩 잘라 1번 벨트부터 m번 벨트까지 올려줌.
 
-# 100 12 3 10 12 20 15 14 19 22 25 16 17 21 18 30 30 20 20 10 18 17 15 25 11 14 17
 num_100 = list(map(int, input().split()))
 n = num_100[1]
 m = num_100[2]
@@ -40,15 +39,9 @@ for i in range(m):
         # belt_info[i][j].append(data)
         belt_info[i].append(data)
 
-# for i in belt_info:
-#     print(i)
-
-# # print(belt_info)
-        
 ### Belf Info 딱 저장되어 있음.
         
 # ## 2. 물건 하차
-# 200 25
 # 200 w_max 형태
 # ## 하차된 상자 무게의 총 합을 출력해야 함.
 # ID랑 무게 형태로 저장되어 있음.
@@ -66,12 +59,7 @@ def num_200(belt_info, w_max, belt_correct_check):
                 belt_info[i].pop(0)
     return belt_info, hacha_box_weight
 
-# belt_info, hacha_box_weight = num_200(belt_info, 25, belt_correct_check)
-# print('num_200', hacha_box_weight)
-
 # 3. 물건 제거
-# 300 22
-# 300 999
 # 300 r_id 형태
 # 이 명령에서는 그러한 상자가 있는 경우 r_id값을, 없다면 -1을 출력
 # 해당 고유 번호에 해당하는 상자가 놓여있는 벨트가 있다면, 
@@ -89,12 +77,7 @@ def num_300(belt_info, r_id, belt_correct_check):
                     return r_id, belt_info, belt_correct_check
     return -1, belt_info, belt_correct_check
 
-# print('num_300', num_300(belt_info, 22, belt_correct_check))
-# print('num_300', num_300(belt_info, 999, belt_correct_check))
-
 # 4. 물건 확인
-# 400 14
-# 400 18
 # 400 f_id
 # 그러한 상자가 있는 경우 f_id값을, 없다면 -1을 출력
 # 해당 고유 번호에 해당하는 상자가 놓여있는 벨트가 있다면 해당 벨트의 번호를 출력하고, 없다면 -1을 출력
@@ -115,11 +98,7 @@ def num_400(belt_info, f_id, belt_correct_check):
                     return i + 1, belt_info, belt_correct_check
     return -1, belt_info, belt_correct_check
 
-# print('num_400', num_400(belt_info, 14, belt_correct_check))
-# print('num_400', num_400(belt_info, 18, belt_correct_check))
-
 # 5. 벨트 고장
-# 500 3
 # 500 b_num
 # 이 명령을 수행하기 전 만약 b_num 벨트가 이미 망가져 있었다면 -1
 # 그렇지 않았다면 정상적으로 고장을 처리했다는 뜻으로 b_num
@@ -146,8 +125,6 @@ def num_500(belt_info, b_num, belt_correct_check):
                     belt_info[i].append(belt_info[b_num][j])
                 belt_info[b_num] = []
                 return b_num + 1, belt_info, belt_correct_check
-
-# print('num_500', num_500(belt_info, 3, belt_correct_check))
 
 for i in range(q-1):
     input_data = list(map(int, input().split()))
