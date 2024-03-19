@@ -47,12 +47,15 @@ def num_200(belt_info, w_max, belt_correct_check):
         if belt_correct_check[i] == True:
             pass
         else:
-            if belt_info[i][0][1] <= w_max:
-                hacha_box_weight += belt_info[i][0][1]
-                belt_info[i].pop(0)
-            else:
-                belt_info[i].append(belt_info[i][0])
-                belt_info[i].pop(0)
+            if belt_info[i] == []:
+                pass
+            else: 
+                if belt_info[i][0][1] <= w_max:
+                    hacha_box_weight += belt_info[i][0][1]
+                    belt_info[i].pop(0)
+                else:
+                    belt_info[i].append(belt_info[i][0])
+                    belt_info[i].pop(0)
     return belt_info, hacha_box_weight
 
 # 3. 물건 제거
