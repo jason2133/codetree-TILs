@@ -22,45 +22,10 @@ things_per_line = n // m
 # belt_info = [[[] for i in range(things_per_line)] for j in range(m)]
 belt_info = [[] for j in range(m)]
 
-# for i in belt_info:
-#     print(i)
-
-########################################################
-# a = [i for i in range(16)]
-# b = [[] for i in range(4)]
-# print(b)
-
-# for i in range(4):
-#     for j in range(4):
-#         value = a.pop(0)
-#         b[i].append(value)
-
-# for i in b:
-#     print(i)
-########################################################
-# a = [i for i in range(12)]
-# b = [[] for i in range(3)]
-# print(b)
-
-# for i in range(3):
-#     for j in range(4):
-#         value = a.pop(0)
-#         b[i].append(value)
-
-# for i in b:
-#     print(i)
-########################################################
-
 belt_prev_info = []
 for i in range(n):
     id_and_w = [num_100[3 + i], num_100[3 + n + i]]
     belt_prev_info.append(id_and_w)
-    # print(id_and_w)
-
-# for i in belt_prev_info:
-#     print(i)
-# print('len(belt_prev_info)', len(belt_prev_info))
-# print('belt_prev_info is up')
 
 for i in range(m):
     for j in range(things_per_line):
@@ -122,21 +87,10 @@ def num_400(belt_info, f_id, belt_correct_check):
                 if belt_info[i][j][0] == f_id:
                     # 단, 상자가 있는 경우, 해당 상자 위에 있는 모든 상자를 전부 앞으로 가져옴.
                     # 가져올 시 순서는 그대로 유지가 되어야 함에 유의
-                    # for k in range(j + len(belt_info[i])):
-                    # for k in range(len(belt_info[i]), j-1, -1):
-                    #     belt_info[i].insert(0, belt_info[i][-1])
-                    #     belt_info[i].pop()
-                    # for k in range(j, len(belt_info[i])):
-                    #     belt_info[i].insert(0, belt_info[i][k])
-                    #     belt_info[i].remove(belt_info[i][k])
-
-                    # 단, 상자가 있는 경우, 해당 상자 위에 있는 모든 상자를 전부 앞으로 가져옴.
-                    # 가져올 시 순서는 그대로 유지가 되어야 함에 유의
                     added_info = []
                     for k in range(len(belt_info[i]), j-1, -1):
                         added_info.append(belt_info[i][-1])
                         belt_info[i].pop()
-                    # added_info = added_info[::-1]
                     belt_info[i] = added_info + belt_info[i]
                     return i + 1, belt_info, belt_correct_check
     return -1, belt_info, belt_correct_check
@@ -173,36 +127,17 @@ for i in range(q-1):
     input_data = list(map(int, input().split()))
 
     if input_data[0] == 200:
-        # if input_data[1] == 15:
-        #     for i in belt_info:
-        #         print(i)
         belt_info, hacha_box_weight = num_200(belt_info, input_data[1], belt_correct_check)
         print(hacha_box_weight)
-        # print('input data', input_data[0], input_data[1])
-        # for i in belt_info:
-        #     print(i)
-        # print('-'*30)
 
     elif input_data[0] == 300:
         answer, belt_info, belt_correct_check = num_300(belt_info, input_data[1], belt_correct_check)
         print(answer)
-        # print('input data', input_data[0], input_data[1])
-        # for i in belt_info:
-        #     print(i)
-        # print('-'*30)
     
     elif input_data[0] == 400:
         answer, belt_info, belt_correct_check = num_400(belt_info, input_data[1], belt_correct_check)
         print(answer)
-        # print('input data', input_data[0], input_data[1])
-        # for i in belt_info:
-        #     print(i)
-        # print('-'*30)
 
     elif input_data[0] == 500:
         answer, belt_info, belt_correct_check = num_500(belt_info, input_data[1], belt_correct_check)
         print(answer)
-        # print('input data', input_data[0], input_data[1])
-        # for i in belt_info:
-        #     print(i)
-        # print('-'*30)
