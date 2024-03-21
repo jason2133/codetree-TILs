@@ -35,6 +35,8 @@
 
 ############################################################################
 
+from collections import deque
+
 # 명령의 수 q
 q = int(input())
 
@@ -52,7 +54,8 @@ m = num_100[2]
 # n개의 벨트, m개의 물건
 # m개의 선물 위치 -> 공백을 사이에 두고 주어짐.
 # 선물의 번호는 오름차순으로 벨트에 쌓임.
-belt_info = [[] for i in range(n)]
+# belt_element = deque([])
+belt_info = [deque([]) for i in range(n)]
 
 for i in range(m):
     present_info = num_100[i + 3]
@@ -73,11 +76,12 @@ for i in range(m):
 
 # 200 2 4
 def num_200(m_src, m_dst, belt_info):
-    move_before_belt = belt_info[m_src - 1]
-    move_after_belt = belt_info[m_dst - 1]
+    # move_before_belt = belt_info[m_src - 1]
+    # move_after_belt = belt_info[m_dst - 1]
 
-    for i in range(len(move_before_belt)):
-        move_data = belt_info[m_src - 1].pop(-1)
+    for i in range(len(belt_info[m_src - 1])):
+        # move_data = belt_info[m_src - 1].pop(-1)
+        move_data = belt_info[m_src - 1].pop()
         belt_info[m_dst - 1].insert(0, move_data)
     return len(belt_info[m_dst - 1]), belt_info
 
@@ -96,26 +100,29 @@ def num_200(m_src, m_dst, belt_info):
 
 # 300 2 4
 def num_300(m_src, m_dst, belt_info):
-    move_before_belt = belt_info[m_src - 1]
-    move_after_belt = belt_info[m_dst - 1]
+    # move_before_belt = belt_info[m_src - 1]
+    # move_after_belt = belt_info[m_dst - 1]
 
     # 둘 다 0개일 경우
-    if belt_info[m_src - 1] == [] and belt_info[m_dst - 1] == []:
+    if belt_info[m_src - 1] == deque([]) and belt_info[m_dst - 1] == deque([]):
         return 0, belt_info
     # before가 아예 없을 경우
-    elif belt_info[m_src - 1] == [] and len(belt_info[m_dst -1]) >= 1:
-        data = belt_info[m_dst - 1].pop(0)
+    elif belt_info[m_src - 1] == deque([]) and len(belt_info[m_dst -1]) >= 1:
+        # data = belt_info[m_dst - 1].pop(0)
+        data = belt_info[m_dst - 1].popleft()
         belt_info[m_src - 1].append(data)
         return len(belt_info[m_dst - 1]), belt_info
 
     # after가 아예 없을 경우
-    elif len(belt_info[m_src - 1]) >= 1 and belt_info[m_dst - 1] == []:
-        data = belt_info[m_src - 1].pop(0)
+    elif len(belt_info[m_src - 1]) >= 1 and belt_info[m_dst - 1] == deque([]):
+        # data = belt_info[m_src - 1].pop(0)
+        data = belt_info[m_src - 1].popleft()
         belt_info[m_dst - 1].append(data)
         return len(belt_info[m_dst - 1]), belt_info
 
     # 둘 다 내용물이 있을 경우
-    elif len(belt_info[m_src - 1]) >= 1 and len(belt_info[m_dst -1]) >= 1:
+    # elif len(belt_info[m_src - 1]) >= 1 and len(belt_info[m_dst -1]) >= 1:
+    else:
         belt_info[m_src - 1][0], belt_info[m_dst - 1][0] = belt_info[m_dst - 1][0], belt_info[m_src - 1][0]
         return len(belt_info[m_dst - 1]), belt_info
 
@@ -135,19 +142,22 @@ def num_300(m_src, m_dst, belt_info):
 # 400 4 2
 def num_400(m_src, m_dst, belt_info):
     # 만약 m_src 벨트에 선물이 1개인 경우에는 선물을 옮기지 않음.
-    if belt_info[m_src - 1] == [] or len(belt_info[m_src - 1]) == 1:
-        if belt_info[m_dst - 1] == []:
+    if belt_info[m_src - 1] == deque([]) or len(belt_info[m_src - 1]) == 1:
+        if belt_info[m_dst - 1] == deque([]):
             return 0, belt_info
         else:
             return len(belt_info[m_dst - 1]), belt_info
     
     # m_src번째 벨트에 있는 선물들의 개수를 n
     num = len(belt_info[m_src - 1])
-    move_list = []
+    # move_list = []
+    move_list = deque([])
     for i in range(num // 2):
-        data = belt_info[m_src - 1].pop(0)
+        # data = belt_info[m_src - 1].pop(0)
+        data = belt_info[m_src - 1].popleft()
         move_list.append(data)
-    move_list = move_list[::-1]
+    # move_list = move_list[::-1]
+    move_list.reverse()
     belt_info[m_dst - 1] = move_list + belt_info[m_dst - 1]
     return len(belt_info[m_dst - 1]), belt_info
 
@@ -192,7 +202,7 @@ def num_500(p_num, belt_info):
 
 def num_600(b_num, belt_info):
     belt_go = belt_info[b_num - 1]
-    if belt_go == []:
+    if belt_go == deque([]):
         a = -1
         b = -1
         c = 0
