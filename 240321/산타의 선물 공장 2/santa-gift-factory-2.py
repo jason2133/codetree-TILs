@@ -1,265 +1,278 @@
-# 산타의 선물 공장 2
-# 각 벨트의 정보와 선물의 정보를 조회할 수 있는 기능들을 추가 -> 새로운 공장을 만듦.
+##### Intuition
+# 선물 & 벨트 관리
+# -> 중요한 것
+# (1) 각 벨트의 상태를 유지하는 것
+# (2) 선물들 간의 상호관계를 효과적으로 나타내는 것
 
-# 1. 공장 설립
-# n개의 벨트, m개의 물건
-# m개의 선물 위치 -> 공백을 사이에 두고 주어짐.
-# 선물의 번호는 오름차순으로 벨트에 쌓임.
+## 주어진 명령들을 실행할 때마다,
+# 벨트와 선물들의 상태를 갱신하며,
+# 필요한 정보를 빠르고 정확하게 가져올 수 있어야 함.
 
-# 2. 물건 모두 옮기기
-# m_src번째 밸트에 있는 선물 -> 모두 m_dst번째 벨트의 선물들로 옮김.
-# 옮겨진 선물들은 m_dst 벨트 앞에 위치함.
-# 만약 m_src번째 벨트에 선물이 존재하지 않다면 아무것도 옮기지 않아도 됨.
-# 옮긴 뒤에 m_dst번째 벨트에 있는 선물들의 개수를 출력함.
+# -> 이를 위해,
+# 각 선물은 이전 선물과 다음 선물을 가리키는 포인터를 가지며
+# 각 벨트는 첫 번째와 마지막 선물을 가리키는 포인터 및 선물의 개수를 기록함.
 
-# 3. 앞 물건만 교체하기
-# m_src번째 벨트에 있는 선물 중 가장 앞에 있는 선물을 m_dst번째 벨트의 선물들 중 가장 앞에 있는 선물과 교체함.
-# 둘 중 하나의 벨트에 선물이 아예 존재하지 않다면 교체하지 않고, 해당 벨트로 선물을 옮기기만 하면 됨.
-# 옮긴 뒤에 m_dst번째 벨트에 있는 선물들의 개수를 출력함.
+# 명령에 따라, 선물들을 옮기거나 교체할 때는 이 포인터를 조작하여 벨트의 상태를 갱신하고,
+# 선물 정보를 알아낼 때는 포인터를 통해 연결된 선물들을 조사함.
 
-# 4. 물건 나누기
-# m_src번째 벨트에 있는 선물들의 개수 -> n
-# 가장 앞에서 floor(n / 2) 번째까지 있는 선물들을 m_dst 번째 벨트에 있는 앞으로 옮김.
-# m_src번째 벨트에 선물이 1개인 경우에는 선물을 옮기지 않음.
-# 옮긴 뒤에 m_dst번째 벨트에 있는 선물들의 개수를 출력함.
 
-# 5. 선물 정보 얻기
-# 선물 번호 p_num
-# -> 해당 선물의 앞 선물의 번호 a와 뒤 선물의 번호 b라고 할 때 -> a + 2 * b를 출력함.
-# 만약 앞 선물이 없는 경우 a = -1, 뒤 선물이 없는 경우 b = -1을 넣어줌.
+##### Algorithm
+# 각 작업을 수행하기 위해 -> 입력받은 명령어의 종류에 따라 분기하여 처리함.
 
-# 6. 벨트 정보 얻기
-# 벨트 번호 b_num
-# -> 해당 벨트의 맨 앞에 있는 선물의 번호 a, 맨 뒤에 있는 선물의 번호를 b, 해당 벨트에 있는 선물의 개수를 c라고 할 때 -> a + 2 * b + 3 * c 출력
-# 선물이 없는 벨트의 경우, a와 b 모두 -1이 됨.
+### BuildFactory 함수
+# 공장의 초기 설정을 함.
+# 벨트 별로 어떤 선물들이 있는지 입력을 받음.
+# 각 벨트의 첫번째와 마지막 선물, 선물의 개수를 저장하고, head / tail 포인터를 초기화함.
 
-############################################################################
+### Move 함수
+# 한 벨트의 모든 선물을 다른 벨트로 옮김.
+# 이때, 수신 벨트에 처음 옮기는 상황과 이미 선물이 있어서 연결해야 하는 상황을 구분함.
 
-from collections import deque
+### Change 함수
+# 두 벨트의 첫번째 선물을 교환함.
 
-# 명령의 수 q
-q = int(input())
+# RemoveHead 함수를 통해 각 벨트의 Head 선물을 제거함.
+# PushHead 함수를 통해 서로 교환하여 넣음.
+
+### Divide 함수
+# 한 벨트에서 선물의 절반을 다른 벨트로 옮김.
+
+# RemoveHead를 사용하여 앞에서부터 차례대로 제거함.
+# 다른 벨트에는 순서를 유지하기 위해 역순으로 PushHead로 추가함.
+
+### GiftScore 함수 / BeltScore 함수 -> 각각의 선물 정보와 벨트에 대한 정보를 출력함.
+# 선물 정보는 이전, 다음 선물을 포인터를 통해 조회함.
+# 벨트 정보는 벨트의 head, tail 포인터와 num_gift를 이용해 계산함.
+
+# 각 함수들은 벨트와 선물의 상태를 유지하는 데 중점을 두고 설계되었음.
+# 시간복잡도는 O(Q)
+
+##### 시간복잡도를 줄이기 위해,
+# 함수 내부의 연산이 주로 포인터 조작과 기본적인 산술 계산으로 이루어짐.
+## -> 각 명령의 수행 시간이 매우 빠름.
+
+MAX_N = 100000
+MAX_M = 100000
+
+# 변수 선언
+# n개의 벨트, m개의 선물
+n = -1
+m = -1
+q = -1
+
+######### 따로 데이터를 저장해서, 계산 복잡도를 줄이려고 하는 것이구나.
+
+# ID에 해당하는 상자의 ntx값과 prv값을 관리함.
+# 0이면 없다는 뜻임.
+prv = [0] * (MAX_M + 1)
+nxt = [0] * (MAX_M + 1)
+
+# 각 벨트별로 head, tail id, 그리고 총 선물 수를 관리함.
+# 0이면 없다는 뜻임.
+head = [0] * MAX_N
+tail = [0] * MAX_N
+num_gift = [0] * MAX_N
 
 # 공장 설립
-num_100 = tuple(map(int, input().split()))
+def build_factory(elems):
+    # 공장 정보를 입력받음.
+    n = elems[1]
+    m = elems[2]
 
-# 100 4 6 1 2 2 2 1 4
-# 100 n m B_NUM1 B_NUM2 ... B_NUMm
+    # 벨트 정보를 만들어줌.
+    boxes = [[] for i in range(n)]
 
-# n개의 벨트, m개의 선물
-n = num_100[1]
-m = num_100[2]
+    for _id in range(1, m + 1):
+        b_num = elems[_id + 2]
+        b_num -= 1
 
-# 1. 공장 설립
-# n개의 벨트, m개의 물건
-# m개의 선물 위치 -> 공백을 사이에 두고 주어짐.
-# 선물의 번호는 오름차순으로 벨트에 쌓임.
-# belt_element = deque([])
-belt_info = [deque([]) for i in range(n)]
+        boxes[b_num].append(_id)
 
-for i in range(m):
-    present_info = num_100[i + 3]
-    belt_info[present_info - 1].append(i + 1)
+    # 초기 벨트의 head, tail, nxt, prv 값을 설정해줌.
+    for i in range(n):
+        # 비어 있는 벨트라면 패스
+        if len(boxes[i]) == 0:
+            continue
 
-# for i in belt_info:
-#     print(i)
+        # head, tail을 설정해줌.
+        head[i] = boxes[i][0]
+        tail[i] = boxes[i][-1]
 
+        # 벨트 내 선물 총 수를 관리해줌.
+        num_gift[i] = len(boxes[i])
 
-# 2. 물건 모두 옮기기
-# 200 m_src m_dst 
-# 진행 이후 m_dst의 선물의 총 수를 출력함.
-
-# m_src번째 밸트에 있는 선물 -> 모두 m_dst번째 벨트의 선물들로 옮김.
-# 옮겨진 선물들은 m_dst 벨트 앞에 위치함.
-# 만약 m_src번째 벨트에 선물이 존재하지 않다면 아무것도 옮기지 않아도 됨.
-# 옮긴 뒤에 m_dst번째 벨트에 있는 선물들의 개수를 출력함.
-
-# 200 2 4
-def num_200(m_src, m_dst, belt_info):
-    # move_before_belt = belt_info[m_src - 1]
-    # move_after_belt = belt_info[m_dst - 1]
-
-    for i in range(len(belt_info[m_src - 1])):
-        # move_data = belt_info[m_src - 1].pop(-1)
-        move_data = belt_info[m_src - 1].pop()
-        belt_info[m_dst - 1].insert(0, move_data)
-    return len(belt_info[m_dst - 1]), belt_info
-
-# print(num_200(2, 4, belt_info))
-
-# answer, belt_info = num_200(2, 4, belt_info)
-# print(answer, belt_info)
-
-# 3. 앞 물건만 교체하기
-# 300 m_src m_dst
-# 진행 이후 m_dst의 선물의 총 수를 출력함.
-
-# m_src번째 벨트에 있는 선물 중 가장 앞에 있는 선물을 m_dst번째 벨트의 선물들 중 가장 앞에 있는 선물과 교체함.
-# 둘 중 하나의 벨트에 선물이 아예 존재하지 않다면 교체하지 않고, 해당 벨트로 선물을 옮기기만 하면 됨.
-# 옮긴 뒤에 m_dst번째 벨트에 있는 선물들의 개수를 출력함.
-
-# 300 2 4
-def num_300(m_src, m_dst, belt_info):
-    # move_before_belt = belt_info[m_src - 1]
-    # move_after_belt = belt_info[m_dst - 1]
-
-    # 둘 다 0개일 경우
-    if belt_info[m_src - 1] == deque([]) and belt_info[m_dst - 1] == deque([]):
-        return 0, belt_info
-    # before가 아예 없을 경우
-    elif belt_info[m_src - 1] == deque([]) and len(belt_info[m_dst -1]) >= 1:
-        # data = belt_info[m_dst - 1].pop(0)
-        data = belt_info[m_dst - 1].popleft()
-        belt_info[m_src - 1].append(data)
-        return len(belt_info[m_dst - 1]), belt_info
-
-    # after가 아예 없을 경우
-    elif len(belt_info[m_src - 1]) >= 1 and belt_info[m_dst - 1] == deque([]):
-        # data = belt_info[m_src - 1].pop(0)
-        data = belt_info[m_src - 1].popleft()
-        belt_info[m_dst - 1].append(data)
-        return len(belt_info[m_dst - 1]), belt_info
-
-    # 둘 다 내용물이 있을 경우
-    # elif len(belt_info[m_src - 1]) >= 1 and len(belt_info[m_dst -1]) >= 1:
-    else:
-        belt_info[m_src - 1][0], belt_info[m_dst - 1][0] = belt_info[m_dst - 1][0], belt_info[m_src - 1][0]
-        return len(belt_info[m_dst - 1]), belt_info
-
-# answer, belt_info = num_300(2, 4, belt_info)
-# print(answer, belt_info)
-
-# 4. 물건 나누기
-# 400 m_src m_dst
-# m_dst의 선물의 총 수를 출력
-# 최대 100번까지 주어지는 명령임
-
-# m_src번째 벨트에 있는 선물들의 개수 -> n
-# 가장 앞에서 floor(n / 2) 번째까지 있는 선물들을 m_dst 번째 벨트에 있는 앞으로 옮김.
-# m_src번째 벨트에 선물이 1개인 경우에는 선물을 옮기지 않음.
-# 옮긴 뒤에 m_dst번째 벨트에 있는 선물들의 개수를 출력함.
-
-# 400 4 2
-def num_400(m_src, m_dst, belt_info):
-    # 만약 m_src 벨트에 선물이 1개인 경우에는 선물을 옮기지 않음.
-    if belt_info[m_src - 1] == deque([]) or len(belt_info[m_src - 1]) == 1:
-        if belt_info[m_dst - 1] == deque([]):
-            return 0, belt_info
-        else:
-            return len(belt_info[m_dst - 1]), belt_info
+        # nxt, prv를 설정해줌.
+        for j in range(len(boxes[i]) - 1):
+            nxt[boxes[i][j]] = boxes[i][j + 1]
+            prv[boxes[i][j + 1]] = boxes[i][j]
     
-    # m_src번째 벨트에 있는 선물들의 개수를 n
-    num = len(belt_info[m_src - 1])
-    # move_list = []
-    move_list = deque([])
-    for i in range(num // 2):
-        # data = belt_info[m_src - 1].pop(0)
-        data = belt_info[m_src - 1].popleft()
-        move_list.append(data)
-    # move_list = move_list[::-1]
-    move_list.reverse()
-    belt_info[m_dst - 1] = move_list + belt_info[m_dst - 1]
-    return len(belt_info[m_dst - 1]), belt_info
+# 물건을 전부 옮겨줌.
+def move(elems):
+    m_src = elems[1] - 1
+    m_dst = elems[2] - 1
 
-# answer, belt_info = num_400(4, 2, belt_info)
-# print(answer, belt_info)
+    # m_src에 물건이 없다면
+    # 그대로 m_dst 내 물건 수가 답이 됨.
+    if num_gift[m_src] == 0:
+        print(num_gift[m_dst])
+        return
+    
+    # m_dst에 물건이 없다면
+    # 그대로 옮겨줌.
+    if num_gift[m_dst] == 0:
+        head[m_dst] = head[m_src]
+        tail[m_dst] = tail[m_src]
+    else:
+        orig_head = head[m_dst]
 
-# 5. 선물 정보 얻기
-# 500 p_num
-#  앞 선물의 번호 a과 뒤 선물의 번호 b라 할 때 a + 2 * b를 출력
-# 없는 경우 각각 -1을 대입
-def num_500(p_num, belt_info):
-    for i in range(len(belt_info)):
-        if p_num in belt_info[i]:
-            num_index = belt_info[i].index(p_num)
-            if num_index == 0:
-                a = -1
-            else:
-                a = belt_info[i][num_index - 1]
+        # m_dst의 head를 교체해줌.
+        head[m_dst] = head[m_src]
+        
+        # m_src의 tail과 기존 m_dst의 head를 연결해줌.
+        src_tail = tail[m_src]
+        nxt[src_tail] = orig_head
+        prv[orig_head] = src_tail
+    
+    # head, tail을 비워줌.
+    head[m_src] = 0
+    tail[m_src] = 0
 
-            if num_index == (len(belt_info[i]) - 1):
-                b = -1
-            else:
-                b = belt_info[i][num_index + 1]
-            
-            return (a + 2 * b), belt_info
+    # 선물 상자 수를 갱신해줌.
+    num_gift[m_dst] += num_gift[m_src]
+    num_gift[m_src] = 0
 
-# # 500 6
-# answer, belt_info = num_500(6, belt_info)
-# print(answer, belt_info)
+    print(num_gift[m_dst])
 
-# # 500 5
-# answer, belt_info = num_500(5, belt_info)
-# print(answer, belt_info)
+# 해당 벨트의 head를 제거함.
+def remove_head(b_num):
+    # 불가능하면 패스함.
+    if not num_gift[b_num]:
+        return 0
+    
+    # 노드가 1개라면
+    # head, tail 전부 삭제 후 반환함.
+    if num_gift[b_num] == 1:
+        _id = head[b_num]
+        head[b_num] = 0
+        tail[b_num] = 0
+        return _id
+    
+    # head를 바꿔줌
+    hid = head[b_num]
+    next_head = nxt[hid]
+    
+    nxt[hid] = 0
+    prv[next_head] = 0
 
-# 6. 벨트 정보 얻기
-# 600 b_num
+    num_gift[b_num] -= 1
+    head[b_num] = next_head
 
-# 벨트 번호 b_num
-# -> 해당 벨트의 맨 앞에 있는 선물의 번호 a, 맨 뒤에 있는 선물의 번호를 b, 해당 벨트에 있는 선물의 개수를 c라고 할 때 
-# -> a + 2 * b + 3 * c 출력
-# 선물이 없는 벨트의 경우, a와 b 모두 -1이 됨.
+    return hid
 
-def num_600(b_num, belt_info):
-    belt_go = belt_info[b_num - 1]
-    if belt_go == deque([]):
+# 해당 벨트에 head를 추가함.
+def push_head(b_num, hid):
+    # 불가능한 경우에는 진행하지 않음.
+    if hid == 0:
+        return
+    
+    # 비어 있었다면
+    # head, tail이 동시에 추가됨.
+    if not num_gift[b_num]:
+        head[b_num] = hid
+        tail[b_num] = hid
+
+        num_gift[b_num] = 1
+    
+    # 그렇지 않다면
+    # head만 교체됨.
+    else:
+        orig_head = head[b_num]
+        nxt[hid] = orig_head
+        prv[orig_head] = hid
+        head[b_num] = hid
+        num_gift[b_num] += 1
+    
+# 앞 물건을 교체해줌.
+def change(elems):
+    m_src = elems[1] - 1
+    m_dst = elems[2] - 1
+
+    src_head = remove_head(m_src)
+    dst_head = remove_head(m_dst)
+
+    push_head(m_dst, src_head)
+    push_head(m_src, dst_head)
+
+    print(num_gift[m_dst])
+
+# 물건을 나눠옮김.
+def divide(elems):
+    m_src = elems[1] - 1
+    m_dst = elems[2] - 1
+
+    # 순서대로 src에서 박스들을 빼줌.
+    cnt = num_gift[m_src]
+    box_ids = []
+    
+    for i in range(cnt // 2):
+        box_ids.append(remove_head(m_src))
+
+    # 거꾸로 뒤집어서 하나씩 dst에 박스들을 넣어줌.
+    for i in range(len(box_ids) - 1, -1, -1):
+        push_head(m_dst, box_ids[i])
+    
+    print(num_gift[m_dst])
+
+# 선물 점수를 얻음.
+def gift_score(elems):
+    p_num = elems[1]
+
+    if prv[p_num] != 0:
+        a = prv[p_num]
+    else:
         a = -1
-        b = -1
-        c = 0
+
+    if nxt[p_num] != 0:
+        b = nxt[p_num]
     else:
-        a = belt_go[0]
-        b = belt_go[-1]
-        c = len(belt_go)
-    return (a + 2 * b + 3 * c), belt_info
-
-# # 600 1
-# answer, belt_info = num_600(1, belt_info)
-# print(answer, belt_info)
-
-# # 600 3
-# answer, belt_info = num_600(3, belt_info)
-# print(answer, belt_info)
-
-###################################################
-## 200
-# answer, belt_info = num_200(2, 4, belt_info)
-# print(answer, belt_info)
-
-## 300
-# answer, belt_info = num_300(2, 4, belt_info)
-# print(answer, belt_info)
-
-## 400
-# answer, belt_info = num_400(4, 2, belt_info)
-# print(answer, belt_info)
-
-## 500
-# answer, belt_info = num_500(6, belt_info)
-# print(answer, belt_info)
-
-## 600
-# answer, belt_info = num_600(3, belt_info)
-# print(answer, belt_info)
-
-for i in range(q - 1):
-    input_data = tuple(map(int, input().split()))
-
-    if input_data[0] == 200:
-        answer, belt_info = num_200(input_data[1], input_data[2], belt_info)
-        print(answer)
+        b = -1
     
-    elif input_data[0] == 300:
-        answer, belt_info = num_300(input_data[1], input_data[2], belt_info)
-        print(answer)
-    
-    elif input_data[0] == 400:
-        answer, belt_info = num_400(input_data[1], input_data[2], belt_info)
-        print(answer)
+    print(a + 2 * b)
 
-    elif input_data[0] == 500:
-        answer, belt_info = num_500(input_data[1], belt_info)
-        print(answer)
+# 벨트 정보를 얻음.
+def belt_score(elems):
+    b_num = elems[1] - 1
+
+    if head[b_num] != 0:
+        a = head[b_num]
+    else:
+        a = -1
+
+    if tail[b_num] != 0:
+        b = tail[b_num]
+    else:
+        b = -1
     
-    elif input_data[0] == 600:
-        answer, belt_info = num_600(input_data[1], belt_info)
-        print(answer)
+    c = num_gift[b_num]
+    
+    print(a + 2 * b + 3 * c)
+
+# 입력
+q = int(input())
+
+for i in range(q):
+    elems = list(map(int, input().split()))
+    q_type = elems[0]
+
+    if q_type == 100:
+        build_factory(elems)
+    elif q_type == 200:
+        move(elems)
+    elif q_type == 300:
+        change(elems)
+    elif q_type == 400:
+        divide(elems)
+    elif q_type == 500:
+        gift_score(elems)
+    else:
+        belt_score(elems)
