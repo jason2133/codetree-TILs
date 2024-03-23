@@ -133,36 +133,14 @@ def shortest_path_2(start, end, board):
 # 가장 가까이에 있는것 -> 최단 거리에 해당하는 곳을 의미함.
 # 가장 가까운 베이스캠프가 여러 가지인 경우에는 그 중 행이 작은 베이스캠프, 행이 같다면 열이 작은 베이스 캠프로 들어감.
 # t번 사람이 베이스 캠프로 이동하는 데에는 시간이 전혀 소요되지 않음.
-
-# # basecamp_info       
-# def player_where_to_go(basecamp_info, market, move_check):
-#     candidate = []
-#     distance = 1e9
-#     for i in range(len(basecamp_info)):
-#         # start, end, board
-#         path = shortest_path_2(basecamp_info[i], market, board)
-#         # print(f'{basecamp_info[i]} to {market} path', path)
-
-#         if len(path) < distance:
-#             distance = len(path)
-#             candidate = []
-#             candidate.append(basecamp_info[i])
-#         elif len(path) == distance:
-#             candidate.append(basecamp_info[i])
-#     candidate = sorted(candidate, key=lambda x: (x[0], x[1]))
-#     # print(f'candidate : {candidate}')
-#     return candidate[0][0], candidate[0][1]
-                        
+                   
 # basecamp_info       
 def player_where_to_go(basecamp_info, market, move_check):
     candidate = []
     distance = 1e9
     for i in range(len(basecamp_info)):
         if move_check[basecamp_info[i][0]][basecamp_info[i][1]] != -1:
-            # start, end, board
             path = shortest_path_2(basecamp_info[i], market, board)
-            # print(f'{basecamp_info[i]} to {market} path', path)
-
             if len(path) < distance:
                 distance = len(path)
                 candidate = []
@@ -170,7 +148,6 @@ def player_where_to_go(basecamp_info, market, move_check):
             elif len(path) == distance:
                 candidate.append(basecamp_info[i])
     candidate = sorted(candidate, key=lambda x: (x[0], x[1]))
-    # print(f'candidate : {candidate}')
     return candidate[0][0], candidate[0][1]
 
 # 이때부터 다른 사람들은 해당 베이스 캠프가 있는 칸을 지나갈 수 없게 됨.
@@ -186,102 +163,6 @@ def player_where_to_go(basecamp_info, market, move_check):
 ### 총 몇 분 후에 모두 편의점에 도착하는지를 구하는 프로그램
 answer = 0
 player_info = [[-1, -1] for i in range(m)]
-
-# 종료 조건
-# def terminate_condition(player_info, market):
-    # if player_info == market:
-    #     return True
-    # else:
-    #     return False
-
-# t = 0
-# while player_info != market:
-#     if t <= (m - 1):
-#         player_x, player_y = player_where_to_go(basecamp_info, market[t])
-#         player_info[t] = [player_x, player_y]
-    
-#     for i in range(len(player_info)):
-#         if player_info[i] == market[i]:
-#             continue
-#         else:
-#             if player_info[i] != [-1, -1]:
-#                 start = player_info[i]
-#                 end = market[i]
-#                 path = shortest_path_1(start, end, board, move_check)
-#                 route = path[0]
-#                 route_x, route_y = route[0], route[1]
-#                 player_info[i] = [route_x, route_y]
-
-#     for i in range(len(player_info)):
-#         if player_info[i] in market or player_info[i] in basecamp_info:
-#             move_check[player_info[i][0]][player_info[i][1]] = -1
-    
-#     print(t)
-#     t += 1
-
-# print(t)
-
-# print('basecamp', basecamp_info)
-
-# t = 0
-# # while player_info != market:
-# for kkk in range(10):
-#     if t <= (m - 1):
-#         player_x, player_y = player_where_to_go(basecamp_info, market[t])
-#         player_info[t] = [player_x, player_y]
-    
-#     for i in range(len(player_info)):
-#         if player_info[i] == market[i]:
-#             pass
-#         else:
-#             if player_info[i] != [-1, -1]:
-#                 start = player_info[i]
-#                 end = market[i]
-#                 path = shortest_path_1(start, end, board, move_check)
-#                 # print(f'{i} : {path}')
-#                 route = path[1]
-#                 route_x, route_y = route[0], route[1]
-#                 player_info[i] = [route_x, route_y]
-
-#     for i in range(len(player_info)):
-#         if player_info[i] in market or player_info[i] in basecamp_info:
-#             move_check[player_info[i][0]][player_info[i][1]] = -1
-
-#     print(f'{t} : {player_info} to {market}')
-#     t += 1
-
-# print(t)
-
-    # if t <= (m - 1):
-    #     player_x, player_y = player_where_to_go(basecamp_info, market[t])
-    #     player_info[t] = [player_x, player_y]
-
-# t = 0
-# # while player_info != market:
-# for kkk in range(10):    
-#     for i in range(len(player_info)):
-#         if player_info[i] == market[i]:
-#             pass
-#         else:
-#             if player_info[i] != [-1, -1]:
-#                 start = player_info[i]
-#                 end = market[i]
-#                 path = shortest_path_1(start, end, board, move_check)
-#                 # print(f'{i} : {path}')
-#                 route = path[1]
-#                 route_x, route_y = route[0], route[1]
-#                 player_info[i] = [route_x, route_y]
-
-#     if t <= (m - 1):    
-#         player_x, player_y = player_where_to_go(basecamp_info, market[t], move_check)
-#         player_info[t] = [player_x, player_y]
-
-#     for i in range(len(player_info)):
-#         if player_info[i] in market or player_info[i] in basecamp_info:
-#             move_check[player_info[i][0]][player_info[i][1]] = -1
-
-#     # print(f'{t} : {player_info} to {market}')
-#     t += 1
 
 t = 0
 while player_info != market: 
