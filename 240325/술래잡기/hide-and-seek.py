@@ -1,412 +1,275 @@
-# 술래잡기 고무줄 놀이
+### 시뮬레이션
 
-# n x n 크기의 격자
-# -> 술래 : 처음 정중앙에 서있음.
+##########################################################################
+### Intuition
+# 술래잡기 게임 : 최종 점수 -> 술래가 도망자를 잡는 횟수에 비례함.
+# 술래와 도망자들이 일정한 규칙에 따라 움직인다는 사실에 주의해야 함.
+# 술래와 도망자의 움직임 패턴을 이해하고, 이를 효과적으로 시뮬레이션하여 술래가 각 턴마다 얻을 수 있는 점수를 계산하도록 함.
 
-# m명의 도망자
-# -> 도망자 : 처음 지정된 곳에 서있음. (중앙 X)
-# 도망자의 종류
-## 1. 좌우로만 움직이는 유형 (항상 오른쪽을 보고 시작)
-## 2. 상하로만 움직이는 유형 (항상 아래쪽을 보고 시작)
+# 도망자의 이동 -> 술래와의 거리 판단, 격자 범위 내 이동 등의 조건을 충족해야 함.
+# 술래의 이동 -> 정해진 패스에 따른 것이므로 술래의 진행 경로를 미리 계산해두고 시뮬레이션 중 이를 따라 이동함.
+####### 이 접근 방법은 맞았는데 ㅠ 왜 그럴까...
 
-# h개의 나무
-# 나무가 도망자와 초기에 겹쳐서 주어지는 것 역시 가능함.
+# 나무로 가려진 도망자 -> 술래에게 보이지 않으므로 이런 예외 사항도 고려해야 함.
+# 이러한 시뮬레이션을 k번 반복하여, 게임이 종료될 때까지의 술래의 총 점수를 계산함.
+##########################################################################
 
-# 총 k번 반복
-# m명의 도망자가 먼저 동시에 움직임
-# 그 다음 술래가 움직임
-# 도망자가 움직임
-# 술래가 움직임
-# 도망자가 1턴 -> 술래가 1턴 이런식으로 반복
+##########################################################################
+### Algorithm
+# 먼저, 술래의 이동 경로를 계산함.
+# 격자의 중심에서 시작하여 달팽이 모양의 경로에 따라 격자의 끝까지 도달하면 다시 중앙으로 이동하는 경로를 구성함.
+# -> 술래의 정방향과 역방향 이동 경로를 각각 계산함.
 
-### 도망자가 움직일 때, 현재 술래와의 거리가 3 이하인 도망자만 움직임
-# 거리는 |x1 - x2| + |y1 - y2|로 정의
+# 다음으로, 모든 턴에서 다음과 같은 과정을 수행함.
+# 도망자가 술래와의 거리를 고려하여 움직임.
+# 술래가 움직임.
+# 술래가 시야 내에 있는 도망자를 잡고 점수를 획득함.
 
-### 거리 3 이하인 도망자는 1턴동안 다음 규칙에 따라 움직이게 됨.
-# 1. 현재 바라보고 있는 방향으로 1칸 움직인다고 했을 때 격자를 벗어나지 않는 경우
-# 움직이려는 칸에 술래가 있는 경우라면 움직이지 않음.
-# 움직이려는 칸에 술래가 있지 않다면 해당 칸으로 이동함. 해당 칸에 나무가 있어도 괜찮음.
+# 술래와 도망자의 움직임 -> 각자 규칙이 존재하므로 코드에서 각 조건을 체크하면서 적절히 처리함.
 
-# 2. 현재 바라보고 있는 방향으로 1칸 움직인다 했을 때 격자를 벗어나는 경우
-# 먼저 방향을 반대로 틀어줌.
-# 바라보고 있는 방향으로 1칸 움직인다 했을 때, 해당 위치에 술래가 없다면 1칸 앞으로 이동함. (술래가 있다면 이동 X)
+# 도망자는 격자를 벗어나지 않고 술래가 있는 칸으로는 이동하지 않으며,
+# 격자의 경계에 도달하면 반대 방향으로 이동할 수 있어야 함.
 
-### 술래가 움직이는 경우
-# 달팽이 모양으로 움직임
-# 만약 끝에 도달하게 되면, 다시 거꾸로 중심으로 이동함
-# 다시 중심에 오게 되면, 처음처럼 위 방향으로 시작하여 시계 방향으로 도는 것
-### -> k턴에 걸쳐 반복함.
+# 술래는 규칙적인 경로를 따라 이동 및 방향 전환 후 시야 내에 있는 도망자를 잡음.
 
-# 술래는 1번의 턴 동안 정확히 한 칸 해당하는 방향으로 이동하게 됨.
-# 이동 후의 위치가 만약 이동방향이 틀어지는 지점이라면, 방향으로 바로 틀어줌.
-###### 만약 이동을 통해 양끝에 해당하는 위치인 (1행, 1열) 혹은 정중앙에 도달하게 된다면 이 경우 역시 방향을 바로 틀어줘야 함에 유의함.
+# 이 과정을 k번 반복한 후, 술래의 최종 점수를 출력함.
+##########################################################################
 
-# 이동 직후 술래는 턴을 넘기기 전에 시야 내에 있는 도망자를 잡게 됨.
-# 술래의 시야는 현재 바라보고 있는 방향을 기준으로 현재 칸을 포함하여 총 3칸
-###### 격자 크기에 상관 없이 술래의 시야는 항상 3칸임에 유의함.
+# 문제 풀이
 
-# 하지만 만약 나무가 놓여 있는 칸이라면,
-# 해당 칸에 있는 도망자는 나무에 가려져 보이지 않게 됨.
-
-# 잡힌 도망자는 사라지게 되고, 
-# 술래는 현재 턴을 t번째 턴이라고 했을 때 t x 현재 턴에서 잡힌 도망자의 수만큼의 점수를 얻게됨.
-
-# 다시 도망자의 턴이 진행되고, 이어서 술래의 턴이 진행되는 것을 총 k번에 걸쳐 반복하게 됨.
-
-##### k번에 걸쳐 술래잡기를 진행하는 동안 술래가 총 얻게된 점수를 출력하는 프로그램을 작성
-
-#####################################
-# n, m, h, k
-# n x n 크기의 격자
-# m명의 도망자
-# h개의 나무
-# k개의 턴
-
+# 변수 선언 및 출력
 n, m, h, k = tuple(map(int, input().split()))
 
-# -> 술래 : 처음 정중앙에 서있음.
-soolae_info = [n // 2, n // 2, 0, 0]
+# 각 칸에 있는 도망자 정보를 관리함.
+# 도망자의 방향만 저장하면 충분함.
+hiders= [
+    [[] for i in range(n)]
+    for j in range(n)
+]
 
-# 단, 이동 도중 도망자들의 위치는 겹칠 수 있음에 유의
-board = [[[] for i in range(n)] for j in range(n)]
+next_hiders = [
+    [[] for i in range(n)]
+    for j in range(n)
+]
 
-# m개의 줄 : 도망자의 위치 (x, y) / 이동 방법 d
-# d : 1 => 좌우로 움직임
-# d : 2 => 상하로 움직임
-### 진짜 방향 (좌우 / 상하)
+tree = [
+    [False] * n
+    for i in range(n)
+]
 
-domang_people_info = []
+# 정방향 기준으로
+# 현재 위치에서 술래가 움직여야 할 방향을 관리함.
+seeker_next_dir = [
+    [0] * n
+    for i in range(n)
+]
+
+# 역방향 기준으로
+# 현재 위치에서 술래가 움직여야 할 방향을 관리함.
+seeker_rev_dir = [
+    [0] * n
+    for i in range(n)
+]
+
+# 술래의 현재 위치
+seeker_pos = (n // 2, n // 2)
+
+# 술래가 움직이는 방향
+# 정방향이면 True
+# 아니라면 False
+forward_facing = True
+
+ans = 0
+
+# 술래 정보를 입력받음.
 for i in range(m):
-    input_data = list(map(int, input().split()))
-    input_data[0] -= 1
-    input_data[1] -= 1
-    input_data.append(0)
-    domang_people_info.append(input_data)
+    x, y, d = tuple(map(int, input().split()))
+    hiders[x - 1][y - 1].append(d)
 
-# 좌우로 움직이는 사람 -> 항상 오른쪽을 보고 시작함.
-dx_1 = [0, 0]
-dy_1 = [1, -1]
-
-# 상하로 움직이는 사람 -> 항상 아래쪽을 보고 시작함.
-dx_2 = [1, -1]
-dy_2 = [0, 0]
-
-# h개의 줄 : 나무의 위치 (x, y) 주어짐.
-tree_info = []
+# 나무 정보를 입력받음.
 for i in range(h):
-    input_data = list(map(int, input().split()))
-    tree_info.append(input_data)
+    x, y = tuple(map(int, input().split()))
+    tree[x - 1][y - 1] = True
 
-# 5 3 1 1
+# 정중앙으로부터 끝까지 움직이는 경로를 계산해줌.
+def initialize_seeker_path():
+    # 상우하좌 순서대로 넣어줌
+    dxs = [-1, 0, 1, 0]
+    dys = [0, 1, 0, -1]
 
-### 도망자의 위치
-# 2 4 1
-# 1 4 2
-# 4 2 1
+    # 시작 위치와 방향,
+    # 해당 방향으로 이동할 횟수를 설정함.
+    curr_x, curr_y = n // 2, n // 2
+    move_dir = 0
+    move_num = 1
 
-### 나무의 위치
-# 2 4
+    while curr_x or curr_y:
+        # move_num만큼 이동
+        for i in range(move_num):
+            seeker_next_dir[curr_x][curr_y] = move_dir
+            curr_x = curr_x + dxs[move_dir]
+            curr_y = curr_y + dys[move_dir]
 
-answer = 0
+            seeker_rev_dir[curr_x][curr_y] = move_dir + 2 if move_dir < 2 else move_dir - 2
 
-# 도망자와 술래 사이의 거리를 구하는 함수
-def distance_between_domang_and_soolae(domang, soolae):
-    domang_x, domang_y, type, dir = domang
-    soolae_x, soolae_y, dir, up_or_down = soolae
-    distance = abs(domang_x - soolae_x) + abs(domang_y - soolae_y)
-    return distance
-
-# 도망자 이동하는 함수
-def domang_move(domang, soolae):
-    domang_x, domang_y, type, dir = domang
-
-    # 이동 방법 d가 1인 경우 좌우로 움직임
-    # 좌우로 움직이는 사람은 항상 오른쪽을 보고 시작
-    if type == 1:
-        nx = domang_x + dx_1[dir]
-        ny = domang_y + dy_1[dir]
-
-        # 범위 안에 있을 경우
-        if 0 <= nx < n and 0 <= ny < n:
-            # 움직이려는 칸에 술래가 있지 않은 경우
-            if nx != soolae[0] and ny != soolae[1]:
-                domang_x = nx
-                domang_y = ny
-                domang = [domang_x, domang_y, type, dir]
-                return domang
-            # 움직이려는 칸에 술래가 있는 경우
-            else:
-                domang = [domang_x, domang_y, type, dir]
-                return domang
-    
-        # 범위 안에 없는 경우
-        else:
-            if dir == 0:
-                dir = 1
-                nx = domang_x + dx_1[dir]
-                ny = domang_y + dy_1[dir]
-
-                # 움직이려는 칸에 술래가 있지 않은 경우
-                if nx != soolae[0] and ny != soolae[1]:
-                    domang_x = nx
-                    domang_y = ny
-                    domang = [domang_x, domang_y, type, dir]
-                    return domang
-                else:
-                    domang = [domang_x, domang_y, type, dir]
-                    return domang
-            
-            elif dir == 1:
-                dir = 0
-                nx = domang_x + dx_1[dir]
-                ny = domang_y + dy_1[dir]
-
-                # 움직이려는 칸에 술래가 있지 않은 경우
-                if nx != soolae[0] and ny != soolae[1]:
-                    domang_x = nx
-                    domang_y = ny
-                    domang = [domang_x, domang_y, type, dir]
-                    return domang
-                else:
-                    domang = [domang_x, domang_y, type, dir]
-                    return domang
-
-    # 2인 경우 상하로만 움직임
-    # 상하로 움직이는 사람은 항상 아래쪽을 보고 시작
-    elif type == 2:
-        nx = domang_x + dx_2[dir]
-        ny = domang_y + dy_2[dir]
-
-        # 범위 안에 있을 경우
-        if 0 <= nx < n and 0 <= ny < n:
-            # 움직이려는 칸에 술래가 있지 않은 경우
-            if nx != soolae[0] and ny != soolae[1]:
-                domang_x = nx
-                domang_y = ny
-                domang = [domang_x, domang_y, type, dir]
-                return domang
-            # 움직이려는 칸에 술래가 있는 경우
-            else:
-                domang = [domang_x, domang_y, type, dir]
-                return domang
-    
-        # 범위 안에 없는 경우
-        else:
-            if dir == 0:
-                dir = 1
-                nx = domang_x + dx_2[dir]
-                ny = domang_y + dy_2[dir]
-
-                # 움직이려는 칸에 술래가 있지 않은 경우
-                if nx != soolae[0] and ny != soolae[1]:
-                    domang_x = nx
-                    domang_y = ny
-                    domang = [domang_x, domang_y, type, dir]
-                    return domang
-                else:
-                    domang = [domang_x, domang_y, type, dir]
-                    return domang
-            
-            elif dir == 1:
-                dir = 0
-                nx = domang_x + dx_2[dir]
-                ny = domang_y + dy_2[dir]
-
-                # 움직이려는 칸에 술래가 있지 않은 경우
-                if nx != soolae[0] and ny != soolae[1]:
-                    domang_x = nx
-                    domang_y = ny
-                    domang = [domang_x, domang_y, type, dir]
-                    return domang
-                else:
-                    domang = [domang_x, domang_y, type, dir]
-                    return domang
-
-soolae_move_dx = []
-soolae_move_dy = []
-
-for i in range(1, n):
-    # 홀수인 경우
-    if i % 2 == 1:
-        for j in range(i):
-            soolae_move_dx.append(-1)
-            soolae_move_dy.append(0)
-        for j in range(i):
-            soolae_move_dx.append(0)
-            soolae_move_dy.append(1)
-    # 짝수인 경우
-    else:
-        for j in range(i):
-            soolae_move_dx.append(1)
-            soolae_move_dy.append(0)
-        for j in range(i):
-            soolae_move_dx.append(0)
-            soolae_move_dy.append(-1)
-    
-# 마지막인 경우
-for i in range(n-1):
-    if (n-1) % 2 == 0:
-        soolae_move_dx.append(-1)
-        soolae_move_dy.append(0)
-    else:
-        soolae_move_dx.append(0)
-        soolae_move_dy.append(1)
-
-# print(soolae_move_dx)
-# print(soolae_move_dy)
+            # 이동하는 도중 (0, 0)으로 오게 되면,
+            # 움직이는 것을 종료함.
+            if not curr_x and not curr_y:
+                break
         
-soolae_move_dx_2 = soolae_move_dx[::-1]
-soolae_move_dy_2 = soolae_move_dy[::-1]
-for i in range(len(soolae_move_dx_2)):
-    soolae_move_dx_2[i] *= (-1)
-    soolae_move_dy_2[i] *= (-1)
+        # 방향을 바꿈.
+        move_dir = (move_dir + 1) % 4
 
-dx = [0, 0, 1, -1]
-dy = [1, -1, 0, 0]
+        # 만약 현재 방향이 위 혹은 아래가 된 경우에는
+        # 특정 방향으로 움직여야 할 횟수를 1 증가시킴.
+        if move_dir == 0 or move_dir == 2:
+            move_num += 1
 
-# # 술래가 움직이는 함수
-# def soolae_move(soolae):
-#     soolae_x, soolae_y, soolae_index, soolae_up_or_down = soolae
+# 격자 내에 있는지를 판단함.
+def in_range(x, y):
+    return 0 <= x and x < n and 0 <= y and y < n
 
-#     if soolae_up_or_down == 0:
-#         if soolae_index < len(soolae_move_dx):
-#             nx = soolae_x + soolae_move_dx[soolae_index]
-#             ny = soolae_y + soolae_move_dy[soolae_index]
-#             soolae_index += 1
-#             soolae = [nx, ny, soolae_index, soolae_up_or_down]
-#             # soolae_dir_x = soolae_move_dx[soolae_index]
-#             # soolae_dir_y = soolae_move_dy[soolae_index]
-#             return soolae
-#         else:
-#             soolae_up_or_down = 1
-#             soolae_index = 0
-#             nx = soolae_x + soolae_move_dx_2[soolae_index]
-#             ny = soolae_y + soolae_move_dy_2[soolae_index]
-#             soolae = [nx, ny, soolae_index, soolae_up_or_down]
-#             return soolae
+def hider_move(x, y, move_dir):
+    # 좌우하상 순서대로 넣어줌.
+    dxs = [0, 0, 1, -1]
+    dys = [-1, 1, 0, 0]
+
+    nx = x + dxs[move_dir]
+    ny = y + dys[move_dir]
+
+    # Step 1. 만약 격자를 벗어난다면 우선 방향을 틀어줌.
+    if not in_range(nx, ny):
+        # 0 <. 1, 2 <. 3이 되어야 함.
+        move_dir = 1 - move_dir if move_dir < 2 else 5 - move_dir
+        nx = x + dxs[move_dir]
+        ny = y + dys[move_dir]
+
     
-#     elif soolae_up_or_down == 1:
-#         if soolae_index < len(soolae_move_dx):
-#             nx = soolae_x + soolae_move_dx_2[soolae_index]
-#             ny = soolae_y + soolae_move_dy_2[soolae_index]
-#             soolae_index += 1
-#             soolae = [nx, ny, soolae_index, soolae_up_or_down]
-#             return soolae
-#         else:
-#             soolae_up_or_down = 0
-#             soolae_index = 0
-#             nx = soolae_x + soolae_move_dx[soolae_index]
-#             ny = soolae_y + soolae_move_dy[soolae_index]
-#             soolae = [nx, ny, soolae_index, soolae_up_or_down]
-#             return soolae
+    # Step 2. 그 다음 우치에 술래가 없다면 움직여줌.
+    if (nx, ny) != seeker_pos:
+        next_hiders[nx][ny].append(move_dir)
+    
+    # 술래가 있다면 더 움직이지 않음.
+    else:
+        next_hiders[x][y].append(move_dir)
 
-# 술래가 움직이는 함수
-def soolae_move(soolae):
-    soolae_x, soolae_y, soolae_index, soolae_up_or_down = soolae
+def dist_from_seeker(x, y):
+    # 현재 술래의 위치를 불러옴.
+    seeker_x, seeker_y = seeker_pos
+    return abs(seeker_x - x) + abs(seeker_y - y)
 
-    if soolae_up_or_down == 0:
-        if soolae_index < len(soolae_move_dx):
-            nx = soolae_x + soolae_move_dx[soolae_index]
-            ny = soolae_y + soolae_move_dy[soolae_index]
-            soolae_index += 1
-            soolae = [nx, ny, soolae_index, soolae_up_or_down]
-            if soolae_index < len(soolae_move_dx):
-                soolae_dir_x = soolae_move_dx[soolae_index]
-                soolae_dir_y = soolae_move_dy[soolae_index]
-                return soolae, soolae_dir_x, soolae_dir_y
+def hider_move_all():
+    # Step 1. next hider를 초기화해줌.
+    for i in range(n):
+        for j in range(n):
+            next_hiders[i][j] = []
+    
+    # Step 2. hider를 전부 움직여줌.
+    for i in range(n):
+        for j in range(n):
+            # 술래와의 거리가 3 이내인 도망자들에 대해서만 움직여줌
+            if dist_from_seeker(i, j) <= 3:
+                for move_dir in hiders[i][j]:
+                    hider_move(i, j, move_dir)
+            
+            # 그렇지 않다면 현재 위치 그대로 넣어줌.
             else:
-                soolae_dir_x = soolae_move_dx_2[0]
-                soolae_dir_y = soolae_move_dy_2[0]
-                return soolae, soolae_dir_x, soolae_dir_y
-            # soolae_dir_x = soolae_move_dx[soolae_index]
-            # soolae_dir_y = soolae_move_dy[soolae_index]
-            # return soolae
-        else:
-            soolae_up_or_down = 1
-            soolae_index = 0
-            nx = soolae_x + soolae_move_dx_2[soolae_index]
-            ny = soolae_y + soolae_move_dy_2[soolae_index]
-            soolae = [nx, ny, soolae_index, soolae_up_or_down]
-            soolae_dir_x = soolae_move_dx_2[1]
-            soolae_dir_y = soolae_move_dy_2[1]
-            return soolae, soolae_dir_x, soolae_dir_y
+                for move_dir in hiders[i][j]:
+                    next_hiders[i][j].append(move_dir)
+        
+    # Step 3. next hider 값을 옮겨줌.
+    for i in range(n):
+        for j in range(n):
+            hiders[i][j] = next_hiders[i][j]
+            
+# 현재 술래가 바라보는 방향을 가져옴.
+def get_seeker_dir():
+    # 현재 술래의 위치를 불러옴.
+    x, y = seeker_pos
+
+    # 어느 방향으로 움직여야 하는지에 대한 정보를 가져옴.
+    move_dir = 0
+
+    if forward_facing:
+        move_dir = seeker_next_dir[x][y]
     
-    elif soolae_up_or_down == 1:
-        if soolae_index < len(soolae_move_dx):
-            nx = soolae_x + soolae_move_dx_2[soolae_index]
-            ny = soolae_y + soolae_move_dy_2[soolae_index]
-            soolae_index += 1
-            soolae = [nx, ny, soolae_index, soolae_up_or_down]
-            if soolae_index < len(soolae_move_dx):
-                soolae_dir_x = soolae_move_dx_2[soolae_index]
-                soolae_dir_y = soolae_move_dy_2[soolae_index]
-                return soolae, soolae_dir_x, soolae_dir_y
-            else:
-                soolae_dir_x = soolae_move_dx[0]
-                soolae_dir_y = soolae_move_dy[0]
-                return soolae, soolae_dir_x, soolae_dir_y
-            # return soolae
-        else:
-            soolae_up_or_down = 0
-            soolae_index = 0
-            nx = soolae_x + soolae_move_dx[soolae_index]
-            ny = soolae_y + soolae_move_dy[soolae_index]
-            soolae = [nx, ny, soolae_index, soolae_up_or_down]
-            soolae_dir_x = soolae_move_dx[1]
-            soolae_dir_y = soolae_move_dy[1]
-            return soolae, soolae_dir_x, soolae_dir_y
-            # return soolae
-
-# 술래가 도망자 잡는것
-# 술래의 시야는 현재 바라보고 있는 방향을 기준으로 현재 칸을 포함하여 총 3칸입니다. 격자 크기에 상관없이 술래의 시야는 항상 3칸임에 유의
-def soolae_catch_domang(soolae, soolae_dir_x, soolae_dir_y, domang_info, t):
-    catch_num = 0
-    soolae_x = soolae[0]
-    soolae_y = soolae[1]
-
-    soolae_range = [[soolae_x, soolae_y]]
-    for i in range(1, 3):
-        nx = soolae_x + soolae_dir_x * i
-        ny = soolae_y + soolae_dir_y * i
-        if 0 <= nx < n and 0 <= ny < n:
-            soolae_range.append([nx, ny])
+    else:
+        move_dir = seeker_next_dir[x][y]
     
-    for i in range(len(domang_info)):
-        if domang_info[i] != [-1, -1]:
-            if domang_info[i] in soolae_range:
-                domang_info[i] = [-1, -1]
-                catch_num += 1
-    answer_go = catch_num * t
-    return answer_go
+    return move_dir
 
-##### 구현한 함수
-# 도망자와 술래 사이의 거리를 구하는 함수
-# def distance_between_domang_and_soolae(domang, soolae):
-# return distance
+def check_facing():
+    global forward_facing
 
-# 도망자 이동하는 함수
-# def domang_move(domang, soolae):
-# domang = [domang_x, domang_y, type, dir]
-# return domang
-
-# 술래가 움직이는 함수
-# def soolae_move(soolae):
-# return soolae, soolae_dir_x, soolae_dir_y
-
-# # 술래가 도망자 잡는것
-# # 술래의 시야는 현재 바라보고 있는 방향을 기준으로 현재 칸을 포함하여 총 3칸입니다. 격자 크기에 상관없이 술래의 시야는 항상 3칸임에 유의
-# def soolae_catch_domang(soolae, soolae_dir_x, soolae_dir_y, domang_info, t):
-# return catch_num
-
-for turn in range(1, k + 1):
-    for i in range(len(domang_people_info)):
-        if domang_people_info[i] != [-1, -1]:
-            distance = distance_between_domang_and_soolae(domang_people_info[i], soolae_info)
-            if distance <= 3:
-                domang_people_info[i] = domang_move(domang_people_info[i], soolae_info)
+    # Case 1. 정방향으로 끝에 다다른 경우라면, 방향을 바꿔줌
+    if seeker_pos == (0, 0) and forward_facing:
+        forward_facing = False
     
-    soolae, soolae_dir_x, soolae_dir_y = soolae_move(soolae_info)
-    catch_num = soolae_catch_domang(soolae, soolae_dir_x, soolae_dir_y, domang_people_info, turn)
-    answer += catch_num
+    # Case 2. 역방향으로 끝에 다다른 경우라도, 방향을 바꿔줌
+    if seeker_pos == (n // 2, n // 2) and not forward_facing:
+        forward_facing = True
+    
+def seeker_move():
+    global seeker_pos
 
-print(answer)
+    x, y = seeker_pos
+
+    # 상우하좌 순서대로 넣어줌
+    dxs = [-1, 0, 1, 0]
+    dys = [0, 1, 0, -1]
+
+    move_dir = get_seeker_dir()
+
+    # 술래를 한칸 움직여줌
+    seeker_pos = (x + dxs[move_dir], y + dys[move_dir])
+
+    # 끝에 도달했다면 방향을 바꿔줌
+    check_facing()
+
+def get_score(t):
+    global ans
+
+    # 상우하좌 순서대로 넣어줌
+    dxs = [-1, 0, 1, 0]
+    dys = [0, 1, 0, -1]
+
+    # 현재 술래의 위치를 불러옴
+    x, y = seeker_pos
+
+    # 술래의 방향을 불러옴
+    move_dir = get_seeker_dir()
+
+    # 3칸을 바라봄
+    for dist in range(3):
+        nx = x + dist * dxs[move_dir]
+        ny = y + dist * dys[move_dir]
+
+        # 격자를 벗어나지 않으며, 나무가 없는 위치라면
+        # 도망자들을 전부 잡게 됨.
+        if in_range(nx, ny) and not tree[nx][ny]:
+            # 해당 위치의 도망자 수만큼 점수를 얻게 됨.
+            ans += t * len(hiders[nx][ny])
+
+            # 도망자들이 사라지게 됨
+            hiders[nx][ny] = []
+
+def simulate(t):
+    # 도망자가 움직임
+    hider_move_all()
+
+    # 술래가 움직임
+    seeker_move()
+
+    # 점수를 얻음
+    get_score(t)
+
+# 술래잡기 시작 전에
+# 구현 상의 편의를 위해
+# 술래 경로 정보를 미리 계산함.
+initialize_seeker_path()
+
+# k번에 걸쳐 술래잡기를 진행함.
+for t in range(1, k + 1):
+    simulate(t)
+
+print(ans)
