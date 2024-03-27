@@ -55,17 +55,6 @@ for i in range(n):
     input_data = list(map(int, input().split()))
     board_info.append(input_data)
 
-# 격자의 크기 k, 팀의 개수 m, 라운드 개수 k
-# 7 2 1
-
-# 3 2 1 0 0 0 0
-# 4 0 4 0 2 1 4
-# 4 4 4 0 2 0 4
-# 0 0 0 0 3 0 4
-# 0 0 4 4 4 0 4
-# 0 0 4 0 0 0 4
-# 0 0 4 4 4 4 4
-
 ##### 관리해야 할 데이터
 # 격자에서 이동선 (4)
 # 1, 2, 3 : 머리사람 / 나머지 / 꼬리사람
@@ -115,15 +104,9 @@ def move_line_check(board_info, visited_bfs):
     return group_candidate
 
 group_candidate = move_line_check(board_info, visited_bfs)
-# print('group_candidate')
-# for i in group_candidate:
-#     # print(len(i))
-#     print(i)
-# print('-'*80)
+
 # 격자에서 이동선 재정렬
 # 우하좌상
-# dx = [0, 1, 0, -1]
-# dy = [1, 0, -1, 0]
 dx = [0, -1, 1, 0]
 dy = [1, 0, 0, -1]
 
@@ -133,8 +116,6 @@ people_info = []
 
 for i in range(len(group_candidate)):
     people_data_info = []
-    # print('*'*30)
-    # print('group_candidate[i]', group_candidate[i])
     for j in range(len(group_candidate[i])):
         if board_info[group_candidate[i][j][0]][group_candidate[i][j][1]] == 1:
             people_data_info.append([group_candidate[i][j][0], group_candidate[i][j][1]])
@@ -145,12 +126,6 @@ for i in range(len(group_candidate)):
         if board_info[group_candidate[i][j][0]][group_candidate[i][j][1]] == 3:
             people_data_info.append([group_candidate[i][j][0], group_candidate[i][j][1]])
     people_info.append(people_data_info)
-    # print(people_data_info)
-
-# print('people_info')
-# for i in people_info:
-#     print(i)
-# print('-'*80)
 
 ### Step 1. 각 팀은 머리 사람을 따라서 한 칸 이동함.
 def num_1_move(people_info, group_candidate):
@@ -165,28 +140,8 @@ def num_1_move(people_info, group_candidate):
             break
     return people_info
 
-# people_info_1 = num_1_move(people_info[0], group_candidate[0])
-# print(people_info_1)
-
-# # 각 팀이 획득한 점수
-# team_score = [0 for i in range(m)]
-
 ### Step 2. 각 라운드마다 공이 정해진 선을 따라 던져짐. n개의 행, n개의 열 따라서.
 # 4n번째 라운드를 넘어가는 경우에는 다시 1번째 라운드의 방향으로 돌아감.
-# def num_2_ball(people_info, round_num, team_score):
-#     round_num += 1
-#     if 1 <= round_num <= n:
-#         for j in range(n):
-#             for k in range(len(people_info)):
-#                 if [round_num - 1, j] in people_info[k]:
-#                     score = people_info[k].index([round_num - 1, j]) + 1
-#                     score = score ** 2
-#                     team_score[k] += score
-#                     # people_info[k].append(people_info[0])
-#                     people_info[k][0], people_info[k][-1] = people_info[k][-1], people_info[k][0]
-#                     break
-#             break
-
 def num_2_ball(people_info, round_num, team_score):
     round_num += 1
     if round_num > (4*n):
@@ -245,91 +200,3 @@ for i in range(k):
 
 # print(team_score)
 print(sum(team_score))
-
-    # round_num += 1
-    # num_1_mock = round_num // n
-    # num_1_mock = num_1_mock % 4
-
-    # num_2_nameogi = round_num % n
-
-
-
-
-
-
-# for i in range(len(group_candidate)):
-#     people_data_info = []
-#     people_we_check_data = group_candidate[i]
-#     for j in range(len(people_we_check_data)):
-#         if board_info[people_we_check_data[j][0]][people_we_check_data[j][1]] == 1:
-#             people_data_info.append([i, j])
-#     for j in range(len(people_we_check_data)):
-#         if board_info[people_we_check_data[j][0]][people_we_check_data[j][1]] == 2:
-#             people_data_info.append([i, j])
-#     for j in range(len(people_we_check_data)):
-#         if board_info[people_we_check_data[j][0]][people_we_check_data[j][1]] == 3:
-#             people_data_info.append([i, j])
-#     people_info.append(people_data_info)
-
-# 수행해야 할 행동
-
-
-
-# for i in range(k):
-# # 행동 수행
-
-# # 경로 재설정 필요
-# group_candidate_revise = []
-# visited_revise = [[False for i in range(n)] for j in range(n)]
-
-# for i in range(len(group_candidate)):
-#     data = group_candidate[i]
-#     data_first_x, data_first_y = data[0][0], data[0][1]
-#     data_we_want = [[data_first_x, data_first_y]]
-#     this_pos = deque([(data_first_x, data_first_y)])
-#     while this_pos:
-#         this_pos_x, this_pos_y = this_pos.popleft()
-#         for j in range(4):
-#             nx = this_pos_x + dx[j]
-#             ny = this_pos_y + dy[j]
-
-#             # 범위 안에 있고
-#             if 0 <= nx < n and 0 <= ny < n:
-#                 # data 안에 있고
-#                 if [nx, ny] in data:
-#                     # 방문하지 않았다면
-#                     if visited_revise[nx][ny] == False:
-#                         if [nx, ny] not in data_we_want:
-#                             visited_revise[nx][ny] = True
-#                             data_we_want.append([nx, ny])
-#                             this_pos.append([nx, ny])
-#                             data.remove([nx, ny])
-#     group_candidate_revise.append(data_we_want)
-
-# for i in group_candidate_revise:
-#     print(i)
-
-# group_candidate_revise = []
-# for i in range(len(group_candidate)):
-#     data = group_candidate[i]
-#     data_first_x, data_first_y = data[0][0], data[0][1]
-#     data_we_want = [[data_first_x, data_first_y]]
-#     this_pos = deque([(data_first_x, data_first_y)])
-#     while this_pos:
-#         this_pos_x, this_pos_y = this_pos.popleft()
-#         for j in range(4):
-#             nx = this_pos_x + dx[j]
-#             ny = this_pos_y + dy[j]
-
-#             # 범위 안에 있고
-#             if 0 <= nx < n and 0 <= ny < n:
-#                 # data 안에 있다면
-#                 if [nx, ny] in data:
-#                     if [nx, ny] not in data_we_want:
-#                         data_we_want.append([nx, ny])
-#                         this_pos.append([nx, ny])
-#                         data.remove([nx, ny])
-#     group_candidate_revise.append(data_we_want)
-# # print(group_candidate_revise) 
-# for i in group_candidate_revise:
-#     print(i)
