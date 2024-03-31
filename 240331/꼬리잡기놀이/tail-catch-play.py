@@ -1,202 +1,230 @@
-# n x n 격자 : 꼬리잡기놀이
+########################################################################
+### Instruction
+# 각 팀의 움직임을 추적
+# 주어진 라운드 -> 점수를 계산하는 시뮬레이션 문제
 
-# 3명 이상이 한 팀이 됨.
+# 플레이어들의 이동 경로(레일)을 효과적으로 관리해야 함.
 
-# 모든 사람들 :
-# 자신의 앞 사람의 허리르 잡고 움직이게 됨.
-# 맨 앞 사람 : 머리 사람 / 맨 뒤 사람 : 꼬리사람
+# 각 팀의 머리 사람, 꼬리 사람의 위치, 이들이 따라야 할 레일 추적
+# -> 라운드별로 공을 던지고, 점수를 얻는 과정 => 순차적으로 처리함.
 
-# 각 팀은 게임에서 주어진 이동 선을 따라서만 이동함.
-# 각 팀의 이동 선은 끝이 이어져있음.
-# 각 팀의 이동 선은 서로 겹치지 않음.
+# 점수 : 그리디한 방식 -> 각 라운드마다 얻을 수 있는 최대를 얻음.
 
-# 한 라운드
-# 1. 먼저 각 팀은 머리사람을 따라서 한 칸을 이동함.
-# 2. 각 라운드마다 공이 정해진 선을 따라 던져짐. n개의 행, n개의 열 따라서.
-# 4n번째 라운드를 넘어가는 경우에는 다시 1번째 라운드의 방향으로 돌아감.
+# 팀의 이동에 따라 레일을 추적하고 업데이트하는 것이 포함됨.
+# 공이 던져졌을 때 어떤 팀이 점수를 얻을 것인지 계산하는 것도 포함됨.
+########################################################################
 
-# 3. 공 던져지는 경우 -> 해당 선 사람 있으면 -> 최초에 만나게 되는 사람 only만이 공을 얻음 -> 점수를 얻게 됨.
-# 점수 : 해당 사람이 머리 사람을 시작으로 -> 팀 내에서 k번째 사람이라면 k의 제곱만큼 점수를 얻게 됨.
-# 아무도 공을 받지 못하는 경우 -> 아무 점수도 획득하지 못함.
+########################################################################
+### Algorithm
+# 게임이 진행되는 동안 -> 이동할 팀들의 레일 위치를 추적 -> 정확한 순서로 정보를 업데이트함.
+# 각 팀의 초기 레일 -> DFS를 이용하여 결정함. 이러한 레일의 저장은 벡터를 사용하여 관리함.
+# 이 레일 정보 -> 각 팀이 한 단계씩 이동할 때마다 업데이트되어야 함.
+# 라운드마다 다른 방향에서 공이 발사되므로 각 방향에 대해 행이나 열을 따라 공이 만나는 첫번째 사람을 찾음.
 
-# 공을 획득한 팀의 경우 -> 머리사람 / 꼬리사람이 바뀜. 즉, 방향이 바뀌게 됨.
+# 만약 공을 받은 사람이 있다면, 해당 팀의 레일 순서를 뒤집고 점수를 플레이어의 위치에 따라 계산하여 더해줌.
+# 최종적으로 주어진 라운드 수 동안 이 모든 과정을 반복하여 총합 점수를 계산함.
+########################################################################
 
-# 4. 다음 라운드
-# 4-1. 1라운드 끝난후
-# 4-2. 모든 팀 1칸 이동
-# 4-3. 공 발사
+# 변수 선언 및 입력
+# n 격자의 크기
+# m 팀의 개수
+# k 라운드 수
+n, m, k = tuple(map(int, input().split()))
 
-# 총 격자의 크기
-# 각 팀의 위치
-# 각 팀의 이동 선
-# 총 진행하는 라운드의 수
-##### -> 각 팀이 획득한 점수의 총합을 구하는 프로그램 ㄱㄱ
+board = [[0] * (n + 1)]
 
-###########################################################################
-
-# 격자의 크기 n
-# 팀의 개수 m
-# 라운드 수 k
-n, m, k  = tuple(map(int, input().split()))
-
-# 각 팀이 획득한 점수
-team_score = [0 for i in range(m)]
-
-# n개의 줄
-# 각 행에 해당하는 초기 상태의 정보
-# 0 : 빈칸
-# 1 : 머리사람
-# 2 : 머리사람과 꼬리사람이 아닌 나머지
-# 3 : 꼬리사람
-# 4 : 이동선
-
-board_info = []
 for i in range(n):
-    input_data = list(map(int, input().split()))
-    board_info.append(input_data)
+    board.append([0] + list(map(int, input().split())))
 
-##### 관리해야 할 데이터
-# 격자에서 이동선 (4)
-# 1, 2, 3 : 머리사람 / 나머지 / 꼬리사람
+# 각 팀별 레일 위치를 관리함.
+v = [[] for i in range(m + 1)]
 
-# 우하좌상
-dx = [0, 1, 0, -1]
-dy = [1, 0, -1, 0]
+# 각 팀별 tail 위치를 관리함.
+tail = [0] * (m + 1)
 
-# BFS
-from collections import deque
-visited_bfs = [[False for i in range(n)] for j in range(n)]
-group = []
+visited = [
+    [False] * (n + 1)
+    for i in range(n + 1)
+]    
 
-# 큐 와 왼 어 투
-def move_line_check(board_info, visited_bfs):
-    # global list_save
-    group_candidate = []
-    for i in range(n):
-        for j in range(n):
-            if board_info[i][j] == 4:
-                if visited_bfs[i][j] == False:
-                    list_save = [[i, j]]
-                    this_pos = deque([(i, j)])
-                    while this_pos:
-                        this_pos_x, this_pos_y = this_pos.popleft()
-                        for k in range(4):
-                            nx = this_pos_x + dx[k]
-                            ny = this_pos_y + dy[k]
+# 격자 내 레일에 각 팀 번호를 적어줌.
+board_idx = [
+    [0] * (n + 1)
+    for i in range(n + 1)
+]
 
-                            # 범위 안에 있고
-                            if 0 <= nx < n and 0 <= ny < n:
-                                # 방문하지 않은 곳이라면
-                                if visited_bfs[nx][ny] == False:
-                                    # 0이 아니라면
-                                    if board_info[nx][ny] != 0:
-                                        visited_bfs[nx][ny] = True
-                                        this_pos.append([nx, ny])
-                                        list_save.append([nx, ny])
-                    list_save = sorted(list_save)
-                    ###
-                    list_go = []
-                    for kkk in range(len(list_save)):
-                        if list_save[kkk] not in list_go:
-                            list_go.append(list_save[kkk])
-                    ###
-                    group_candidate.append(list_go)
-    return group_candidate
+ans = 0
 
-group_candidate = move_line_check(board_info, visited_bfs)
+dxs = [-1, 0, 1, 0]
+dys = [0, -1, 0, 1]
 
-# 격자에서 이동선 재정렬
-# 우하좌상
-dx = [0, -1, 1, 0]
-dy = [1, 0, 0, -1]
+# 범위 벗어나는지 확인
+def is_out_range(x, y):
+    return not (1 <= x and x <= n and 1 <= y and y <= n)
 
-# 머리사람 / 중간 사람 / 꼬리사람
-# 1 / 2 / 3
-people_info = []
-
-for i in range(len(group_candidate)):
-    people_data_info = []
-    for j in range(len(group_candidate[i])):
-        if board_info[group_candidate[i][j][0]][group_candidate[i][j][1]] == 1:
-            people_data_info.append([group_candidate[i][j][0], group_candidate[i][j][1]])
-    for j in range(len(group_candidate[i])):
-        if board_info[group_candidate[i][j][0]][group_candidate[i][j][1]] == 2:
-            people_data_info.append([group_candidate[i][j][0], group_candidate[i][j][1]])
-    for j in range(len(group_candidate[i])):
-        if board_info[group_candidate[i][j][0]][group_candidate[i][j][1]] == 3:
-            people_data_info.append([group_candidate[i][j][0], group_candidate[i][j][1]])
-    people_info.append(people_data_info)
-
-### Step 1. 각 팀은 머리 사람을 따라서 한 칸 이동함.
-def num_1_move(people_info, group_candidate):
-    # 머리 사람
-    head_people_x, head_people_y = people_info[0][0], people_info[0][1]
+# 초기 레일을 만들기 위해 DFS를 이용함.
+def dfs(x, y, idx):
+    visited[x][y] = True
+    board_idx[x][y] = idx
+    
     for i in range(4):
-        nx = head_people_x + dx[i]
-        ny = head_people_y + dy[i]
-        if [nx, ny] in group_candidate:
-            people_info.insert(0, [nx, ny])
-            people_info.pop()
-            break
-    return people_info
+        nx = x + dxs[i]
+        ny = y + dys[i]
+        
+        # 범위 벗어나면 continue
+        if is_out_range(nx, ny):
+            continue
+        
+        # 이미 지나간 경로거나 경로가 아니면 넘어감
+        if board[nx][ny] == 0:
+            continue
+        
+        if visited[nx][ny]:
+            continue
+        
+        # 가장 처음 탐색할 때 2가 있는 방향으로 DFS를 진행함.
+        if len(v[idx]) == 1 and board[nx][ny] != 2:
+            continue
+        
+        v[idx].append((nx, ny))
+        
+        if board[nx][ny] == 3:
+            tail[idx] = len(v[idx])
+        
+        dfs(nx, ny, idx)
 
-### Step 2. 각 라운드마다 공이 정해진 선을 따라 던져짐. n개의 행, n개의 열 따라서.
-# 4n번째 라운드를 넘어가는 경우에는 다시 1번째 라운드의 방향으로 돌아감.
-def num_2_ball(people_info, round_num, team_score):
-    round_num += 1
-    if round_num > (4*n):
-        round_num = round_num % (4*n)
-
-    if 1 <= round_num <= n:
-        for k in range(len(people_info)):
-            for j in range(n):
-                if [round_num - 1, j] in people_info[k]:
-                    score = people_info[k].index([round_num - 1, j]) + 1
-                    score = score ** 2
-                    team_score[k] += score
-                    # people_info[k].append(people_info[0])
-                    people_info[k][0], people_info[k][-1] = people_info[k][-1], people_info[k][0]
-                    break
+# 초기 작업을 함.
+def init():
+    cnt = 1
     
-    elif n + 1 <= round_num <= 2*n:
-        round_num = round_num - (n + 1)
-        for k in range(len(people_info)):
-            for j in range(n-1, -1, -1):
-                if [j, round_num] in people_info[k]:
-                    score = people_info[k].index([j, round_num]) + 1
-                    score = score ** 2
-                    team_score[k] += score
-                    # people_info[k].append(people_info[0])
-                    people_info[k][0], people_info[k][-1] = people_info[k][-1], people_info[k][0]
-                    break
+    # 레일을 벡터에 저장함. 머리 사람을 우선 앞에 넣어줌.
+    for i in range(1, n + 1):
+        for j in range(1, n + 1):
+            if board[i][j] == 1:
+                v[cnt].append((i, j))
+                cnt += 1
     
-    elif (2*n + 1) <= round_num <= (3*n):
-        round_num = 3 * n - round_num
-        for k in range(len(people_info)):
-            for j in range(n-1, -1, -1):
-                if [round_num, j] in people_info[k]:
-                    score = people_info[k].index([round_num, j]) + 1
-                    score = score ** 2
-                    team_score[k] += score
-                    people_info[k][0], people_info[k][-1] = people_info[k][-1], people_info[k][0]
-                    break
+    # DFS를 통해 레일을 벡터에 순서대로 넣어줌.
+    for i in range(1, m + 1):
+        x, y = v[i][0]
+        dfs(x, y, i)
+
+# 각 팀을 이동시키는 함수임.
+def move_all():
+    for i in range(1, m + 1):
+        # 각 팀에 대해 레일을 한칸씩 뒤로 이동시킴.
+        tmp = v[i][-1]
+        for j in range(len(v[i]) - 1, 0, -1):
+            v[i][j] = v[i][j - 1]
+        v[i][0] = tmp
     
-    elif (3*n + 1) <= round_num <= (4*n):
-        round_num = 4 * n - round_num
-        for k in range(len(people_info)):
-            for j in range(n):
-                if [j, round_num] in people_info[k]:
-                    score = people_info[k].index([round_num, j]) + 1
-                    score = score ** 2
-                    team_score[k] += score
-                    people_info[k][0], people_info[k][-1] = people_info[k][-1], people_info[k][0]
-                    break
+    for i in range(1, m + 1):
+        # 벡터에 저장한 정보를 바탕으로 보드의 표기 역시 바꿔줌.
+        for j, (x, y) in enumerate(v[i]):
+            if j == 0:
+                board[x][y] = 1
+            elif j < tail[i] - 1:
+                board[x][y] = 2
+            elif j == tail[i] - 1:
+                board[x][y] = 3
+            else:
+                board[x][y] = 4
 
-for i in range(k):
-    # people_info = num_1_move(people_info, group_candidate)
-    for j in range(len(people_info)):
-        people_info[j] = num_1_move(people_info[j], group_candidate[j])
-    num_2_ball(people_info, i, team_score) 
+# (x, y) 지점에 공이 닿았을 때의 점수를 계산함.
+def get_point(x, y):
+    global ans
+    idx = board_idx[x][y]
+    cnt = v[idx].index((x, y))
+    ans += (cnt + 1) * (cnt + 1)
 
-# print(team_score)
-print(sum(team_score))
+# turn 번째 라운드의 공을 던짐.
+# 공을 던졌을 때 이를 받은 팀의 번호를 반환함.
+def throw_ball(turn):
+    t = (turn - 1) % (4 * n) + 1
+    
+    if t <= n:
+        # 1 ~ n 라운드의 경우 왼쪽에서 오른쪽으로 공을 던짐.
+        for i in range(1, n + 1):
+            if 1 <= board[t][i] and board[t][i] <= 3:
+                # 사람이 있는 1번째 지점을 찾음.
+                # 찾게 되면 점수를 체크한 뒤 찾은 사람의 팀 번호를 저장함.
+                get_point(t, i)
+                return board_idx[t][i]
+    
+    elif t <= 2 * n:
+        # n + 1 ~ 2n 라운드의 경우 아래에서 윗쪽 방향으로 공을 던짐.
+        t -= n
+        for i in range(1, n + 1):
+            if 1 <= board[n + 1 - i][t] and board[n + 1 - i][t] <= 3:
+                # 사람이 있는 첫번째 지점을 찾음.
+                # 찾게 되면 점수를 체크한 뒤 찾은 사람의 팀 번호를 저장함.
+                get_point(n + 1 - i, t)
+                return board_idx[n + 1 - i][t]
+    
+    elif t <= 3 * n:
+        # 2n+1 ~ 3n 라운드의 경우 오른쪽에서 왼쪽 방향으로 공을 던집니다.
+        t -= (2 * n)
+        for i in range(1, n + 1):
+            if 1 <= board[n + 1 - t][n + 1 - i] and board[n + 1 - t][n + 1 - i] <= 3:
+                # 사람이 있는 첫 번째 지점을 찾습니다.
+                # 찾게 되면 점수를 체크한 뒤 찾은 사람의 팀 번호를 저장합니다.
+                get_point(n + 1 - t, n + 1 - i)
+                return board_idx[n + 1 - t][n + 1 - i]
+    else:
+        # 3n+1 ~ 4n 라운드의 경우 위에서 아랫쪽 방향으로 공을 던집니다.
+        t -= (3 * n)
+        for i in range(1, n + 1):
+            if 1 <= board[i][n + 1 - t] and board[i][n + 1 - t] <= 3:
+                # 사람이 있는 첫 번째 지점을 찾습니다.
+                # 찾게 되면 점수를 체크한 뒤 찾은 사람의 팀 번호를 저장합니다.
+                get_point(i, n + 1 - t)
+                return board_idx[i][n + 1 - t]
+
+    # 공이 그대로 지나간다면 0을 반환합니다.
+    return 0
+
+
+# 공을 획득한 팀을 순서를 바꿉니다.
+def reverse(got_ball_idx):
+    # 아무도 공을 받지 못했으면 넘어갑니다.
+    if got_ball_idx == 0: 
+        return
+
+    idx = got_ball_idx
+
+    new_v = []
+
+    # 순서를 맞춰 new_v에 레일을 넣어줍니다.
+    for j in range(tail[idx] - 1, -1, -1):
+        new_v.append(v[idx][j])
+
+    for j in range(len(v[idx]) - 1, tail[idx] - 1, -1):
+        new_v.append(v[idx][j])
+
+    v[idx] = new_v[:]
+
+    # 벡터에 저장한 정보를 바탕으로 보드의 표기 역시 바꿔줍니다.
+    for j, (x, y) in enumerate(v[idx]):
+        if j == 0:
+            board[x][y] = 1
+        elif j < tail[idx] - 1:
+            board[x][y] = 2
+        elif j == tail[idx] - 1:
+            board[x][y] = 3
+        else:
+            board[x][y] = 4
+
+
+# 입력을 받고 구현을 위한 기본적인 처리를 합니다.
+init()
+for i in range(1, k + 1):
+# 각 팀을 머리사람을 따라 한칸씩 이동시킵니다.
+    move_all()
+
+    # i번째 라운드의 공을 던집니다. 공을 받은 사람을 찾아 점수를 추가합니다.
+    got_ball_idx = throw_ball(i)
+
+    # 공을 획득한 팀의 방향을 바꿉니다.
+    reverse(got_ball_idx)
+
+print(ans)
