@@ -1,4 +1,3 @@
-# 설계 11분
 # 격자크기, 벽의 개수, 원하는 시원함 정도
 N, M, K = map(int, input().split())
 aircondition = [[] for _ in range(4)]
